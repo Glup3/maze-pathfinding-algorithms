@@ -2,13 +2,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.Arrays;
 import java.util.Stack;
 
-public class maze {
-    private int height;
-    private int width;
-    private boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
+public class MazeClass {
     final private int TOP = 0;
     final private int RIGHT = 1;
     final private int BOTTOM = 2;
@@ -17,14 +13,17 @@ public class maze {
     final public static String DFS_REC = "dfs_rec";
     final public static String DFS_ITER = "dfs_iter";
     final public static String BLANK = "blank";
-
     final private static Color ACTIVE_SQUARE_COLOR = Color.rgb(0, 200, 0);
 
-    private Stack<int[]> iterativeStack = new Stack<int[]>();
+    public int height;
+    public int width;
+    private boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
+
+    public Stack<int[]> iterativeStack = new Stack<int[]>();
     private boolean[][] iterativeVisited = null;
     private int[] currentCell = null;
 
-    public maze(int yDimension, int xDimension) {
+    public MazeClass(int yDimension, int xDimension) {
         height = yDimension;
         width = xDimension;
     }
@@ -38,10 +37,11 @@ public class maze {
             iterativeStack = new Stack<int[]>();
             iterativeVisited = null;
             currentCell = null;
+            MazeSolve.solutionVisited = null;
             if (genType == DFS_ITER) {
-                mainApp.informationText = "New Iteration";
+                MainApp.informationText = "New Iteration";
             } else if (genType == DFS_REC) {
-                mainApp.informationText = "Canceling Iteration";
+                MainApp.informationText = "Canceling Iteration";
             }
         }
         boolean[][] visited = new boolean[height][width];
@@ -56,7 +56,7 @@ public class maze {
         switch (genType) {
             case DFS_REC:
                 dfsRecursiveGeneration(0, 0, visited);
-                mainApp.informationText = "Generated recursively";
+                MainApp.informationText = "Generated recursively";
                 break;
             case DFS_ITER:
                 startIterativeGeneration(0, 0);
@@ -84,14 +84,11 @@ public class maze {
 
 
     public void startIterativeGeneration(int startY, int startX) {
-//        if (iterativeStack.isEmpty()) {
-        mainApp.informationText = "Iterating...";
+        MainApp.informationText = "Iterating...";
         iterativeStack = new Stack<int[]>();
         iterativeStack.push(new int[]{startY, startX});
         iterativeVisited = new boolean[height][width];
-        iterativeVisited[0][0] = true;
-
-//        }
+        iterativeVisited[startY][startX] = true;
     }
 
     public void iterativeGeneration() {
@@ -114,7 +111,7 @@ public class maze {
             currentCell = currCell;
         } else {
             if (currentCell!= null){
-                mainApp.informationText = "Generated Iteratively";
+                MainApp.informationText = "Generated Iteratively";
             }
             currentCell = null;
         }
@@ -140,9 +137,19 @@ public class maze {
 
         //Draw active square
         gc.setFill(ACTIVE_SQUARE_COLOR);
-        if (!iterativeStack.isEmpty())
+        if (!iterativeStack.isEmpty()) {
             gc.fillRect(currentCell[1] * cellDim, currentCell[0] * cellDim, cellDim, cellDim);
-
+        } else if (MazeSolve.solutionVisited != null) {
+            gc.setFill(Color.RED);
+            boolean[][] _pathVisited = MazeSolve.solutionVisited;
+            for (int y = 0; y < _pathVisited.length; y++) {
+                for (int x = 0; x < _pathVisited[y].length; x++) {
+                    if (_pathVisited[y][x]) {
+                        gc.fillRect(x * cellDim, y * cellDim, cellDim, cellDim);
+                    }
+                }
+            }
+        }
         gc.restore();
     }
 

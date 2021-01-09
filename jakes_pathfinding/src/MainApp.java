@@ -6,25 +6,29 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
-//import javafx.scene.control.Label;
-//import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.canvas.*;
 import javafx.stage.Stage;
 import javafx.scene.paint.*;
 
+/**
+  ALL COORDINATES ARE SAVED AS [y][x] WHERE [0][0] IS THE TOP LEFT CORNER
+**/
 
-public class mainApp extends Application implements EventHandler<ActionEvent> {
+public class MainApp extends Application implements EventHandler<ActionEvent> {
 
     private Stage window;
-    private maze Maze;
+    private MazeClass maze;
     private GridPane layout;
     private static Canvas canvas;
     public static String informationText = "Waiting for Input";
     final private Color _DARKGREY = Color.rgb(50, 50, 50);
     //    private GraphicsContext gc;
 //        private Button recursiveButton;
+
+    private static MazeSolve solver = new MazeSolve();
+    private static boolean[][] visitedInSolve;
 
     public static void main(String[] args) {
         launch(args);
@@ -51,21 +55,26 @@ public class mainApp extends Application implements EventHandler<ActionEvent> {
         GridPane.setConstraints(buttonBox, 0, 1);
 
         //******** Maze Object ********
-        Maze = new maze(20, 20);
-        Maze.generateMaze(maze.BLANK);
+        maze = new MazeClass(20, 20);
+        maze.generateMaze(MazeClass.BLANK);
 
         //******** Buttons ********
         Button recursiveButton = new Button();
         recursiveButton.setText("Generate Recursively");
         recursiveButton.setStyle("-fx-font-size: 2em;-fx-background-radius: 8,7,6;");
-        recursiveButton.setOnAction(e -> Maze.generateMaze(maze.DFS_REC));
+        recursiveButton.setOnAction(e -> maze.generateMaze(MazeClass.DFS_REC));
 //        GridPane.setConstraints(recursiveButton, 0, 1);
 //        GridPane.setHalignment(recursiveButton, HPos.CENTER);
         //-  -  -  -  -  -  -  -  -  -  -  -  -
         Button iterativeButton = new Button();
         iterativeButton.setText("Generate  Iteratively");
         iterativeButton.setStyle("-fx-font-size: 2em;-fx-background-radius: 8,7,6;");
-        iterativeButton.setOnAction(e -> Maze.generateMaze(maze.DFS_ITER));
+        iterativeButton.setOnAction(e -> maze.generateMaze(MazeClass.DFS_ITER));
+        //-  -  -  -  -  -  -  -  -  -  -  -  -
+        Button solveButton = new Button();
+        solveButton.setText("Solve!");
+        iterativeButton.setStyle("-fx-font-size: 2em;-fx-background-radius: 8,7,6;");
+        solveButton.setOnAction(e -> MazeSolve.followLeft(maze));
 
         //******** Info Text Label ********
         Label infoTextLabel = new Label();
@@ -79,7 +88,7 @@ public class mainApp extends Application implements EventHandler<ActionEvent> {
         GridPane.setConstraints(canvas, 0, 0);
         GridPane.setHalignment(canvas, HPos.CENTER);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        Maze.drawMaze(gc);
+        maze.drawMaze(gc);
 
         //******** Scene and Stage ********
         buttonBox.getChildren().addAll(recursiveButton, iterativeButton);
@@ -96,8 +105,9 @@ public class mainApp extends Application implements EventHandler<ActionEvent> {
                 gc.clearRect(0, 0, window.getWidth(), window.getHeight());
                 infoTextLabel.setText(informationText);
                 layout.setPadding(new Insets(20, 20, (window.getWidth() - canvas.getWidth()) / 2, (window.getWidth() - canvas.getWidth()) / 2));
-                Maze.iterativeGeneration();
-                Maze.drawMaze(gc);
+                maze.iterativeGeneration();
+                maze.drawMaze(gc);
+
             }
         }.start();
     }
