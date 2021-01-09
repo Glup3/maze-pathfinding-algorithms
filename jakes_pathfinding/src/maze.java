@@ -14,22 +14,36 @@ public class maze {
     final private int BOTTOM = 2;
     final private int LEFT = 3;
 
-    private Stack<Integer> iterativeStack = new Stack<Integer>();
+    final public static String DFS_REC = "dfs_rec";
+    final public static String DFS_ITER = "dfs_iter";
+    final public static String BLANK = "blank";
 
-    public maze(int dimy, int dimx) {
-        height = dimy;
-        width = dimx;
+    final private static Color ACTIVE_SQUARE_COLOR = Color.rgb(0, 200, 0);
+
+    private Stack<int[]> iterativeStack = new Stack<int[]>();
+    private boolean[][] iterativeVisited = null;
+    private int[] currentCell = null;
+
+    public maze(int yDimension, int xDimension) {
+        height = yDimension;
+        width = xDimension;
     }
 
     public static void main(String[] args) {
-        System.out.println("dont call");
-        maze test = new maze(4, 4);
-        test.generateMaze();
-
     }
 
 
-    public void generateMaze() {
+    public void generateMaze(String genType) {
+        if (!iterativeStack.isEmpty()) {
+            iterativeStack = new Stack<int[]>();
+            iterativeVisited = null;
+            currentCell = null;
+            if (genType == DFS_ITER) {
+                mainApp.informationText = "New Iteration";
+            } else if (genType == DFS_REC) {
+                mainApp.informationText = "Canceling Iteration";
+            }
+        }
         boolean[][] visited = new boolean[height][width];
         walls = new boolean[height][width][4];          //would be more efficient to use inverted values, so initialization doesnt have to happen, but this is more intuitive
         for (int y = 0; y < height; y++) {
@@ -39,15 +53,22 @@ public class maze {
                 }
             }
         }
-//        System.out.println();
-//        System.out.println(Arrays.deepToString(walls));
-        generateMaze(0, 0, visited);
-//        System.out.println(Arrays.deepToString(walls));
-//        System.out.println(Arrays.deepToString(visited));
-
+        switch (genType) {
+            case DFS_REC:
+                dfsRecursiveGeneration(0, 0, visited);
+                mainApp.informationText = "Generated recursively";
+                break;
+            case DFS_ITER:
+                startIterativeGeneration(0, 0);
+                break;
+            case BLANK:
+                break;
+            default:
+                System.out.println("Invalid generation type");
+        }
     }
 
-    public void generateMaze(int y, int x, boolean[][] visited) {
+    public void dfsRecursiveGeneration(int y, int x, boolean[][] visited) {
         visited[y][x] = true;
         int[][] possibles = {{y - 1, x, TOP}, {y + 1, x, BOTTOM}, {y, x - 1, LEFT}, {y, x + 1, RIGHT}};
         twoDimArrShuffle(possibles);
@@ -56,10 +77,49 @@ public class maze {
             if ((newY >= 0) && (newY < height) && (newX >= 0) && (newX < width) && (!visited[newY][newX])) {
                 walls[y][x][wallToBreak] = false;                                  //remove wall of current cell
                 walls[newY][newX][(wallToBreak + 2) % 4] = false;                       //remove wall of neighbor
-                generateMaze(newY, newX, visited);                  //dfs recursive
+                dfsRecursiveGeneration(newY, newX, visited);                  //dfs recursive
             }
         }
     }
+
+
+    public void startIterativeGeneration(int startY, int startX) {
+//        if (iterativeStack.isEmpty()) {
+        mainApp.informationText = "Iterating...";
+        iterativeStack = new Stack<int[]>();
+        iterativeStack.push(new int[]{startY, startX});
+        iterativeVisited = new boolean[height][width];
+        iterativeVisited[0][0] = true;
+
+//        }
+    }
+
+    public void iterativeGeneration() {
+        if (!iterativeStack.isEmpty()) {
+            int[] currCell = iterativeStack.pop();
+            int y = currCell[0], x = currCell[1];
+            iterativeVisited[y][x] = true;
+            int[][] possibles = {{y - 1, x, TOP}, {y + 1, x, BOTTOM}, {y, x - 1, LEFT}, {y, x + 1, RIGHT}};
+            twoDimArrShuffle(possibles);
+            for (int[] newCoords : possibles) {
+                int newY = newCoords[0], newX = newCoords[1], wallToBreak = newCoords[2];
+                if ((newY >= 0) && (newY < height) && (newX >= 0) && (newX < width) && (!iterativeVisited[newY][newX])) {
+                    walls[y][x][wallToBreak] = false;                                  //remove wall of current cell
+                    walls[newY][newX][(wallToBreak + 2) % 4] = false;                       //remove wall of neighbor
+                    iterativeStack.push(currCell);
+                    iterativeStack.push(newCoords);
+                    break;
+                }
+            }
+            currentCell = currCell;
+        } else {
+            if (currentCell!= null){
+                mainApp.informationText = "Generated Iteratively";
+            }
+            currentCell = null;
+        }
+    }
+
 
     public void drawMaze(GraphicsContext gc) {
         gc.save();
@@ -79,14 +139,12 @@ public class maze {
         }
 
         //Draw active square
+        gc.setFill(ACTIVE_SQUARE_COLOR);
+        if (!iterativeStack.isEmpty())
+            gc.fillRect(currentCell[1] * cellDim, currentCell[0] * cellDim, cellDim, cellDim);
+
         gc.restore();
     }
-
-
-    private static void iterativeGeneration(int y, int x){
-
-    }
-
 
     private static void twoDimArrShuffle(int[][] arr) {
         for (int i = arr.length - 1; i > 0; i--) {
