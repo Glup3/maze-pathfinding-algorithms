@@ -14,5 +14,6 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         // start Jake's App, temporary
         new MainApp(primaryStage);
+        System.out.println();
     }
 }
