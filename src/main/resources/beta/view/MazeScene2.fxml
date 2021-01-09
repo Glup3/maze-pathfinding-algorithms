@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.bonbo.beta.controller.MazeScene2Controller">
+   <center>
+      <Canvas fx:id="canvas" height="600.0" width="600.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin></Canvas>
+   </center>
+   <bottom>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#generateRecursive" text="Generate Recursive" />
+            <Button mnemonicParsing="false" onAction="#resetGrid" text="Reset" />
+            <Button mnemonicParsing="false" onAction="#generateIterative" text="Generate Iterative" />
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>

@@ -1,6 +1,9 @@
 package org.bonbo;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.bonbo.alpha.MainApp;
 
@@ -11,8 +14,15 @@ public class Main extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage stage) throws Exception {
         // start Jake's App, temporary
-        new MainApp(primaryStage);
+        // new MainApp(stage);
+        Parent root = FXMLLoader.load(getClass().getResource("/beta/view/MazeScene2.fxml"));
+
+        Scene scene = new Scene(root);
+
+        stage.setTitle("Main Scene");
+        stage.setScene(scene);
+        stage.show();
     }
 }
