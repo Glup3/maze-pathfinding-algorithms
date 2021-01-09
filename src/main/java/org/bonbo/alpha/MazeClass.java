@@ -1,3 +1,5 @@
+package org.bonbo.alpha;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -27,10 +29,6 @@ public class MazeClass {
         height = yDimension;
         width = xDimension;
     }
-
-    public static void main(String[] args) {
-    }
-
 
     public void generateMaze(String genType) {
         if (!iterativeStack.isEmpty()) {

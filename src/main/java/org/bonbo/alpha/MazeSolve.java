@@ -1,8 +1,7 @@
+package org.bonbo.alpha;
+
 public class MazeSolve {
     public static boolean[][] solutionVisited;
-
-    public static void main(String[] args) {
-    }
 
     public static int[][] currFLpos;
     public static int FL_orientation;

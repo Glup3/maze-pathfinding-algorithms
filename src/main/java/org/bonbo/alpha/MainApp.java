@@ -1,3 +1,5 @@
+package org.bonbo.alpha;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.*;
@@ -16,7 +18,7 @@ import javafx.scene.paint.*;
   ALL COORDINATES ARE SAVED AS [y][x] WHERE [0][0] IS THE TOP LEFT CORNER
 **/
 
-public class MainApp extends Application implements EventHandler<ActionEvent> {
+public class MainApp implements EventHandler<ActionEvent> {
 
     private Stage window;
     private MazeClass maze;
@@ -30,11 +32,10 @@ public class MainApp extends Application implements EventHandler<ActionEvent> {
     private static MazeSolve solver = new MazeSolve();
     private static boolean[][] visitedInSolve;
 
-    public static void main(String[] args) {
-        launch(args);
+    public MainApp(Stage stage) {
+        start(stage);
     }
 
-    @Override
     public void start(Stage primaryStage) {
 
         final int INITIAL_SCENE_WIDTH = 1000;
