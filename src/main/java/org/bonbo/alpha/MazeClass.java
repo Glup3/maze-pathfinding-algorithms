@@ -15,33 +15,47 @@ public class MazeClass {
     final public static String DFS_REC = "dfs_rec";
     final public static String DFS_ITER = "dfs_iter";
     final public static String BLANK = "blank";
-    final private static Color ACTIVE_SQUARE_COLOR = Color.rgb(0, 200, 0);
+    final private static Color ACTIVE_GEN_SQUARE_COLOR = Color.rgb(0, 200, 0);
+    final private static Color VISITED_SQUARE_COLOR = Color.hsb(0, 0.7, 1,1);
+    final private static Color ACTIVE_SEARCH_SQAURE_COLOR = Color.hsb(0, 1, 0.6,1);
 
     public int height;
     public int width;
-    private boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
+    public boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
 
     public Stack<int[]> iterativeStack = new Stack<int[]>();
     private boolean[][] iterativeVisited = null;
     private int[] currentCell = null;
 
-    public MazeClass(int yDimension, int xDimension) {
+    public int[] start;
+    public int[] exit;
+
+    public static MazeSolve solver;
+
+
+    public MazeClass(int yDimension, int xDimension, MazeSolve _solver) {
         height = yDimension;
         width = xDimension;
+        solver = _solver;
+        start = new int[]{0, 0};
+        exit = new int[]{yDimension - 1, xDimension - 1};
     }
+
 
     public void generateMaze(String genType) {
         if (!iterativeStack.isEmpty()) {
             iterativeStack = new Stack<int[]>();
             iterativeVisited = null;
             currentCell = null;
-            MazeSolve.solutionVisited = null;
+
+//            solver.is solving or sth
             if (genType == DFS_ITER) {
                 MainApp.informationText = "New Iteration";
             } else if (genType == DFS_REC) {
                 MainApp.informationText = "Canceling Iteration";
             }
         }
+        solver.solveStatus = solver.WAITING;
         boolean[][] visited = new boolean[height][width];
         walls = new boolean[height][width][4];          //would be more efficient to use inverted values, so initialization doesnt have to happen, but this is more intuitive
         for (int y = 0; y < height; y++) {
@@ -108,7 +122,7 @@ public class MazeClass {
             }
             currentCell = currCell;
         } else {
-            if (currentCell!= null){
+            if (currentCell != null) {
                 MainApp.informationText = "Generated Iteratively";
             }
             currentCell = null;
@@ -118,11 +132,34 @@ public class MazeClass {
 
     public void drawMaze(GraphicsContext gc) {
         gc.save();
+//        gc.setLineWidth(1);
         Canvas _canvas = gc.getCanvas();
+        double cellDim = _canvas.getWidth() / width;
+        //Background
         gc.setFill(Color.ROYALBLUE);
         gc.fillRect(0, 0, _canvas.getWidth(), _canvas.getHeight());
+
+        //Draw filled squares for generating or solving
+        if (!iterativeStack.isEmpty()) {
+            gc.setFill(ACTIVE_GEN_SQUARE_COLOR);
+            gc.fillRect(currentCell[1] * cellDim, currentCell[0] * cellDim, cellDim, cellDim);
+        } else if (solver.solveStatus > solver.STARTING) {
+            gc.setFill(VISITED_SQUARE_COLOR);
+            boolean[][] _pathVisited = solver.solutionVisited;
+            for (int y = 0; y < _pathVisited.length; y++) {
+                for (int x = 0; x < _pathVisited[y].length; x++) {
+                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim - 1, y * cellDim - 1, cellDim + 1, cellDim + 1);
+//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim-1, y * cellDim-1 , cellDim , cellDim );
+//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim, y * cellDim , cellDim , cellDim );
+//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim - 1, y * cellDim - 1, cellDim + 2, cellDim + 2);      //when not using alpha
+                }
+            }
+            gc.setFill(ACTIVE_SEARCH_SQAURE_COLOR);
+            gc.fillRect(solver.currPos[1] * cellDim, solver.currPos[0] * cellDim, cellDim, cellDim);
+        }
+
+        //Grid
         gc.setStroke(Color.LIGHTGREY);
-        double cellDim = Math.min(_canvas.getWidth(), _canvas.getHeight()) / Math.max(width, height);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 double cX = x * cellDim, cY = y * cellDim;      //canvas x and y for drawing
@@ -133,29 +170,13 @@ public class MazeClass {
             }
         }
 
-        //Draw active square
-        gc.setFill(ACTIVE_SQUARE_COLOR);
-        if (!iterativeStack.isEmpty()) {
-            gc.fillRect(currentCell[1] * cellDim, currentCell[0] * cellDim, cellDim, cellDim);
-        } else if (MazeSolve.solutionVisited != null) {
-            gc.setFill(Color.RED);
-            boolean[][] _pathVisited = MazeSolve.solutionVisited;
-            for (int y = 0; y < _pathVisited.length; y++) {
-                for (int x = 0; x < _pathVisited[y].length; x++) {
-                    if (_pathVisited[y][x]) {
-                        gc.fillRect(x * cellDim, y * cellDim, cellDim, cellDim);
-                    }
-                }
-            }
-        }
         gc.restore();
     }
 
     private static void twoDimArrShuffle(int[][] arr) {
         for (int i = arr.length - 1; i > 0; i--) {
-            int index = (int) (Math.random() * (i + 1));
-            // Simple swap
-            int[] temp = arr[index];
+            int index = (int) (Math.random() * (i + 1));    //Random gen
+            int[] temp = arr[index]; // Simple swap
             arr[index] = arr[i];
             arr[i] = temp;
         }

@@ -17,7 +17,7 @@ import java.util.Stack;
 
 public class MazeScene2Controller implements Initializable {
 
-    public static final int CELL_SIZE = 60;
+    public static final int CELL_SIZE = 20;
 
     @FXML
     private Canvas canvas;
