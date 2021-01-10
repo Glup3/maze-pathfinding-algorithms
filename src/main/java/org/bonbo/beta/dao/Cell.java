@@ -11,12 +11,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Cell {
+
+    @EqualsAndHashCode.Include
     private int x;
+
+    @EqualsAndHashCode.Include
     private int y;
+
     private final boolean[] walls = { true, true, true, true };
+
     private boolean visited;
+
+    @Builder.Default
+    private int distance = Integer.MAX_VALUE;
+
+    private Cell previous;
+
+    private boolean isPath;
     
     public void draw(GraphicsContext gc) {
         gc.setLineWidth(1.0);
@@ -31,8 +44,8 @@ public class Cell {
     }
 
     public void draw(GraphicsContext gc, Color color) {
-        int size = MazeScene2Controller.CELL_SIZE - 1;
+        int size = MazeScene2Controller.CELL_SIZE;
         gc.setFill(color);
-        gc.fillRect(x + 1, y + 1, size, size);
+        gc.fillRect(x, y, size, size);
     }
 }
