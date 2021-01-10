@@ -15,9 +15,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception  {
-//        startMain(stage);
-         quickStartAlpha(stage);
-        // quickStartBeta(stage);
+        // startMain(stage);
+        // quickStartAlpha(stage);
+        quickStartBeta(stage);
     }
 
     public void startMain(Stage stage) throws Exception {

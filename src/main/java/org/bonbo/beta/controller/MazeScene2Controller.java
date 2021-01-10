@@ -10,14 +10,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.ResourceBundle;
-import java.util.Stack;
+import java.util.*;
 
 public class MazeScene2Controller implements Initializable {
 
-    public static final int CELL_SIZE = 20;
+    public static final int CELL_SIZE = 40;
 
     @FXML
     private Canvas canvas;
@@ -42,6 +39,8 @@ public class MazeScene2Controller implements Initializable {
 
     private AnimationTimerExt timer;
 
+    private boolean generated;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         gc = canvas.getGraphicsContext2D();
@@ -61,6 +60,7 @@ public class MazeScene2Controller implements Initializable {
                 if (!cellStack.empty()) {
                     iterativeDFS();
                 } else {
+                    generated = true;
                     stop();
                 }
                 updateCanvas();
@@ -82,6 +82,7 @@ public class MazeScene2Controller implements Initializable {
         resetGrid();
         recursiveDFS(cells.get(0));
         updateCanvas();
+        generated = true;
     }
 
     @FXML
@@ -91,6 +92,7 @@ public class MazeScene2Controller implements Initializable {
         }
         initCells();
         updateCanvas();
+        generated = false;
     }
 
     private void initCells() {
@@ -130,10 +132,18 @@ public class MazeScene2Controller implements Initializable {
         gc.clearRect(0, 0, width, height);
 
         for (Cell cell : cells) {
-            cell.draw(gc);
             if (cell == current) {
                 cell.draw(gc, Color.GREEN);
+            } else if (cell.isPath()) {
+                cell.draw(gc, Color.PURPLE);
             }
+        }
+
+        cells.get(0).draw(gc, Color.YELLOW);
+        cells.get(cells.size() - 1).draw(gc, Color.RED);
+
+        for (Cell cell : cells) {
+            cell.draw(gc);
         }
     }
 
@@ -145,12 +155,21 @@ public class MazeScene2Controller implements Initializable {
         return (x / CELL_SIZE) + (y / CELL_SIZE) * cols;
     }
 
+    private int index(Cell cell, Positions position) {
+        return switch (position) {
+            case TOP -> index(cell.getX(), cell.getY() - CELL_SIZE);
+            case RIGHT -> index(cell.getX() + CELL_SIZE, cell.getY());
+            case BOTTOM -> index(cell.getX(), cell.getY() + CELL_SIZE);
+            case LEFT -> index(cell.getX() - CELL_SIZE, cell.getY());
+        };
+    }
+
     private ArrayList<Cell> getUnvisitedNeighbours(Cell cell) {
         ArrayList<Cell> neighbours = new ArrayList<>();
-        int topIndex = index(cell.getX(), cell.getY() - CELL_SIZE);
-        int rightIndex = index(cell.getX() + CELL_SIZE, cell.getY());
-        int bottomIndex = index(cell.getX(), cell.getY() + CELL_SIZE);
-        int leftIndex = index(cell.getX() - CELL_SIZE, cell.getY());
+        int topIndex = index(cell, Positions.TOP);
+        int rightIndex = index(cell, Positions.RIGHT);
+        int bottomIndex = index(cell, Positions.BOTTOM);
+        int leftIndex = index(cell, Positions.LEFT);
 
         if (topIndex > 0 && !cells.get(topIndex).isVisited()) {
             neighbours.add(cells.get(topIndex));
@@ -169,10 +188,10 @@ public class MazeScene2Controller implements Initializable {
     }
 
     private boolean hasUnvisitedNeighbours(Cell cell) {
-        int topIndex = index(cell.getX(), cell.getY() - CELL_SIZE);
-        int rightIndex = index(cell.getX() + CELL_SIZE, cell.getY());
-        int bottomIndex = index(cell.getX(), cell.getY() + CELL_SIZE);
-        int leftIndex = index(cell.getX() - CELL_SIZE, cell.getY());
+        int topIndex = index(cell, Positions.TOP);
+        int rightIndex = index(cell, Positions.RIGHT);
+        int bottomIndex = index(cell, Positions.BOTTOM);
+        int leftIndex = index(cell, Positions.LEFT);
 
         if (topIndex > 0 && !cells.get(topIndex).isVisited()) {
             return true;
@@ -209,5 +228,77 @@ public class MazeScene2Controller implements Initializable {
             a.getWalls()[0] = false;
             b.getWalls()[2] = false;
         }
+    }
+
+    @FXML
+    private void solve() {
+        if (generated) {
+            solveDijkstra(cells.get(0), cells.get(cells.size() - 1));
+        } else {
+            System.out.println("No maze found...");
+        }
+    }
+
+    private void solveDijkstra(Cell source, Cell target) {
+        Set<Cell> unvisited = new HashSet<>(cells);
+        source.setDistance(0);
+
+        while (!unvisited.isEmpty()) {
+            Cell cell = unvisited
+                    .stream()
+                    .min(Comparator.comparing(Cell::getDistance))
+                    .orElseThrow(NoSuchElementException::new);
+
+            unvisited.remove(cell);
+
+            if (cell == target) {
+                break;
+            }
+
+            getNeighbours(cell).forEach(c -> {
+                int alt = cell.getDistance() + 1;
+                if (alt < c.getDistance()) {
+                    c.setDistance(alt);
+                    c.setPrevious(cell);
+                }
+            });
+        }
+
+        Cell u = target;
+
+        if (u.getPrevious() != null || target == source) {
+            while (u != null) {
+                u.setPath(true);
+                u = u.getPrevious();
+            }
+        }
+
+        updateCanvas();
+    }
+
+    private ArrayList<Cell> getNeighbours(Cell cell) {
+        ArrayList<Cell> neighbours = new ArrayList<>();
+
+        if (!cell.getWalls()[0]) {
+            neighbours.add(cells.get(index(cell, Positions.TOP)));
+        }
+        if (!cell.getWalls()[1]) {
+            neighbours.add(cells.get(index(cell, Positions.RIGHT)));
+        }
+        if (!cell.getWalls()[2]) {
+            neighbours.add(cells.get(index(cell, Positions.BOTTOM)));
+        }
+        if (!cell.getWalls()[3]) {
+           neighbours.add(cells.get(index(cell, Positions.LEFT)));
+        }
+
+        return neighbours;
+    }
+
+    private enum Positions {
+        TOP,
+        RIGHT,
+        BOTTOM,
+        LEFT
     }
 }

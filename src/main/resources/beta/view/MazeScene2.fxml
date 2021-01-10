@@ -14,12 +14,12 @@
          </BorderPane.margin></Canvas>
    </center>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
-         <children>
-            <Button mnemonicParsing="false" onAction="#generateRecursive" text="Generate Recursive" />
-            <Button mnemonicParsing="false" onAction="#resetGrid" text="Reset" />
-            <Button mnemonicParsing="false" onAction="#generateIterative" text="Generate Iterative" />
-         </children>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: white;"
+            BorderPane.alignment="CENTER">
+         <Button mnemonicParsing="false" onAction="#generateRecursive" text="Generate Recursive"/>
+         <Button mnemonicParsing="false" onAction="#resetGrid" text="Reset"/>
+         <Button mnemonicParsing="false" onAction="#generateIterative" text="Generate Iterative"/>
+         <Button mnemonicParsing="false" onAction="#solve" text="Solve"/>
       </HBox>
    </bottom>
 </BorderPane>
