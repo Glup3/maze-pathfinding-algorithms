@@ -22,37 +22,37 @@ public class MainApp implements EventHandler<ActionEvent> {
 
     final private Color _DARKGREY = Color.rgb(50, 50, 50);
 
-    final static private int ITERATION_SPEED = 10;       //how many iterations are done per frame TODO: make slider
+    final private int ITERATION_SPEED = 20;       //how many iterations are done per frame TODO: make slider
 
     private MazeClass maze;
 
     private Stage window;
 
     // objects in stage
-    private static GridPane layout;
-    private static Canvas canvas;
-    private static GraphicsContext gc;
+    private GridPane layout;
+    private Canvas canvas;
+    private GraphicsContext gc;
 
-    private static HBox buttonBox;
-    private static HBox secondBox;
+    private HBox buttonBox;
+    private HBox secondBox;
 
-    private static Button recursiveButton;
-    private static Button iterativeButton;
-    private static Button solveButton;
+    private Button recursiveButton;
+    private Button iterativeButton;
+    private Button solveButton;
 
-    private static Label infoTextLabel;
-    public static ComboBox solveComboBox;
+    private Label infoTextLabel;
+    public ComboBox<String> solveComboBox;
 
-    public static String informationText = "Waiting for Input";
+    private String informationText = "Waiting for Input";
 
-    private static int INITIAL_SCENE_WIDTH;
-    private static int INITIAL_SCENE_HEIGHT;
-    private static int MIN_INITIAL_DIM;
-    private static int GENERAL_PADDING;
+    private int INITIAL_SCENE_WIDTH;
+    private int INITIAL_SCENE_HEIGHT;
+    private int MIN_INITIAL_DIM;
+    private int GENERAL_PADDING;
 
-    private static String buttonStyle;
+    private String buttonStyle;
 
-    private static MazeSolve solver = new MazeSolve();
+    private final MazeSolve solver = new MazeSolve(this);
 
 
     public MainApp(Stage stage) {
@@ -60,34 +60,27 @@ public class MainApp implements EventHandler<ActionEvent> {
     }
 
     public void start(Stage primaryStage) {
-        initDimesionVals(1000);
+
+        initDimensions();
 
         window = primaryStage;
         window.setTitle("Maze Generation");
 
         defineLayout();
 
-        generateHBoxes();
+        initHBoxes();
 
         //******** Maze Object ********
-        maze = new MazeClass(30, 30, solver);       //TODO make grid size dynamic with slider
-        maze.generateMaze(MazeClass.BLANK);
+        maze = new MazeClass(30, 30, solver, this);       //TODO make grid size dynamic with slider
+        maze.generateMaze(maze.BLANK);
 
-        generateButtons(maze);
+        initButtons(maze);
 
-        generateOtherSceneObjects(maze);
+        initLabels_ComboBox(maze);
 
         initCanvas(maze);
 
-        //******** Scene and Stage ********
-        buttonBox.getChildren().addAll(recursiveButton, iterativeButton, solveButton);
-        secondBox.getChildren().addAll(infoTextLabel, solveComboBox);
-        layout.getChildren().addAll(canvas, buttonBox, secondBox);
-        Group root = new Group(layout);
-        Scene scene = new Scene(root, INITIAL_SCENE_WIDTH, INITIAL_SCENE_HEIGHT, _DARKGREY);
-        window.setScene(scene);
-        window.show();
-
+        initStage();
 
 
         new AnimationTimer() {
@@ -98,7 +91,7 @@ public class MainApp implements EventHandler<ActionEvent> {
                 double hPadding = (window.getWidth() - Math.max(canvas.getWidth(), buttonBox.getWidth())) * 0.5 - GENERAL_PADDING * 0.5;
                 layout.setPadding(new Insets(GENERAL_PADDING, hPadding, GENERAL_PADDING, hPadding));
                 for (int i = 0; i < ITERATION_SPEED; i++) {
-                    solver.followLeft(maze);
+                    solver.continueSolve(maze);
                     maze.iterativeGeneration();
                 }
                 maze.drawMaze(gc);
@@ -108,7 +101,7 @@ public class MainApp implements EventHandler<ActionEvent> {
     }
 
 
-    private static void generateHBoxes() {
+    private void initHBoxes() {
         //Horizontal box for buttons
         buttonBox = new HBox();
         buttonBox.setSpacing(GENERAL_PADDING);
@@ -122,35 +115,35 @@ public class MainApp implements EventHandler<ActionEvent> {
         GridPane.setConstraints(secondBox, 0, 2);
     }
 
-    private static void generateButtons(MazeClass maze) {
+    private void initButtons(MazeClass maze) {
         recursiveButton = new Button();
         recursiveButton.setText("Generate Recursively");
         recursiveButton.setStyle(buttonStyle);
-        recursiveButton.setOnAction(e -> maze.generateMaze(MazeClass.DFS_REC));
+        recursiveButton.setOnAction(e -> maze.generateMaze(maze.DFS_REC));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
         iterativeButton = new Button();
         iterativeButton.setText("Generate Iteratively");
         iterativeButton.setStyle(buttonStyle);
-        iterativeButton.setOnAction(e -> maze.generateMaze(MazeClass.DFS_ITER));
+        iterativeButton.setOnAction(e -> maze.generateMaze(maze.DFS_ITER));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
         solveButton = new Button();
         solveButton.setText("Solve!");
         solveButton.setStyle(buttonStyle);
-        solveButton.setOnAction(e -> solver.solveStatus = solver.STARTING);
+        solveButton.setOnAction(e -> solver.solveStatus = MazeSolve.SolveStatus.STARTING);
     }
 
-    private static void defineLayout(){
+    private void defineLayout() {
         layout = new GridPane();
         layout.setPadding(new Insets(GENERAL_PADDING, GENERAL_PADDING, GENERAL_PADDING, GENERAL_PADDING));
         layout.setVgap(GENERAL_PADDING);
         layout.setHgap(GENERAL_PADDING);
     }
 
-    private static void generateOtherSceneObjects(MazeClass maze){
+    private void initLabels_ComboBox(MazeClass maze) {
         //******** Info Text Label ********
         infoTextLabel = new Label();
         infoTextLabel.setStyle(buttonStyle + "-fx-text-fill: white;");
@@ -159,22 +152,24 @@ public class MainApp implements EventHandler<ActionEvent> {
 
 
         //******** Solve Selection ********
-        solveComboBox = new ComboBox(maze.solver.solveOptions);
+        solveComboBox = new ComboBox<>(maze.solver.solveOptions);
         solveComboBox.setPromptText("Choose solving Algorithm");
         solveComboBox.setOnAction(e -> solver.setCurrentSolveMethod(maze.solver));
     }
 
-    private static void initCanvas(MazeClass maze){
+    private void initCanvas(MazeClass maze) {
         //******** Canvas ********
         double minSquare = 0.8 * MIN_INITIAL_DIM;
         canvas = new Canvas(minSquare * Math.min(1, (float) maze.width / maze.height), minSquare * Math.min(1, (float) maze.height / maze.width));
         GridPane.setConstraints(canvas, 0, 0);
         GridPane.setHalignment(canvas, HPos.CENTER);
-         gc = canvas.getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
         maze.drawMaze(gc);
     }
 
-    private static void initDimesionVals(int dim){
+    private void initDimensions() {
+        final int dim = 1000;
+
         INITIAL_SCENE_WIDTH = dim;
         INITIAL_SCENE_HEIGHT = dim;
 
@@ -182,6 +177,22 @@ public class MainApp implements EventHandler<ActionEvent> {
         GENERAL_PADDING = MIN_INITIAL_DIM / 50;
 
         buttonStyle = "-fx-font-size: " + (float) MIN_INITIAL_DIM / 400 + "em;-fx-background-radius: 8,7,6;";
+    }
+
+
+    private void initStage() {
+        //******** Scene and Stage ********
+        buttonBox.getChildren().addAll(recursiveButton, iterativeButton, solveButton);
+        secondBox.getChildren().addAll(infoTextLabel, solveComboBox);
+        layout.getChildren().addAll(canvas, buttonBox, secondBox);
+        Group root = new Group(layout);
+        Scene scene = new Scene(root, INITIAL_SCENE_WIDTH, INITIAL_SCENE_HEIGHT, _DARKGREY);
+        window.setScene(scene);
+        window.show();
+    }
+
+    public void setInformationText(String text) {
+        informationText = text;
     }
 
 
