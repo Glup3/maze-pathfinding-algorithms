@@ -1,6 +1,6 @@
 package org.bonbo.beta.dao;
 
-import org.bonbo.beta.controller.MazeScene2Controller;
+import org.bonbo.beta.controller.MazeSceneController;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import lombok.Builder;
@@ -36,7 +36,7 @@ public class Cell {
     public void draw(GraphicsContext gc) {
         gc.setLineWidth(1.0);
         gc.setStroke(Color.WHITE);
-        int size = MazeScene2Controller.CELL_SIZE;
+        int size = MazeSceneController.CELL_SIZE;
 
         if (walls[0]) { gc.strokeLine(x, y, x + size, y); }
         if (walls[1]) { gc.strokeLine(x + size, y, x + size, y + size); }
@@ -46,7 +46,7 @@ public class Cell {
     }
 
     public void draw(GraphicsContext gc, Color color) {
-        int size = MazeScene2Controller.CELL_SIZE;
+        int size = MazeSceneController.CELL_SIZE;
         gc.setFill(color);
         gc.fillRect(x, y, size, size);
     }
