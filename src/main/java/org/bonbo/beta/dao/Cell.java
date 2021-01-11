@@ -24,6 +24,8 @@ public class Cell {
 
     private boolean visited;
 
+    private boolean visitedSolved;
+
     @Builder.Default
     private int distance = Integer.MAX_VALUE;
 

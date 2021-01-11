@@ -37,9 +37,21 @@ public class MazeScene2Controller implements Initializable {
 
     private Cell current;
 
+    private Cell target;
+
+    private Cell source;
+
+    private Cell u;
+
+    private HashSet<Cell> unvisitedCells;
+
     private AnimationTimerExt timer;
 
+    private AnimationTimerExt solveTimer;
+
     private boolean generated;
+
+    private boolean foundTarget;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -61,7 +73,7 @@ public class MazeScene2Controller implements Initializable {
         cells.get(0).setVisited(true);
         cellStack.push(cells.get(0));
 
-        timer = new AnimationTimerExt(10, 10) {
+        timer = new AnimationTimerExt(10, 50) {
             @Override
             public void handle() {
                 if (!cellStack.empty()) {
@@ -174,6 +186,8 @@ public class MazeScene2Controller implements Initializable {
         for (Cell cell : cells) {
             if (cell == current) {
                 cell.draw(gc, Color.GREEN);
+            } else if (cell.isVisitedSolved() && !cell.isPath()) {
+                cell.draw(gc, Color.ORANGE);
             } else if (cell.isPath()) {
                 cell.draw(gc, Color.PURPLE);
             }
@@ -273,47 +287,80 @@ public class MazeScene2Controller implements Initializable {
     @FXML
     private void solve() {
         if (generated) {
-            solveDijkstra(cells.get(0), cells.get(cells.size() - 1));
+            unvisitedCells = new HashSet<>(cells);
+            source = cells.get(0);
+            target = cells.get(cells.size() - 1);
+            source.setDistance(0);
+
+            timer = new AnimationTimerExt(10) {
+                @Override
+                public void handle() {
+                    if (!foundTarget && !unvisitedCells.isEmpty()) {
+                        solveDijkstra();
+                    } else {
+                        stop();
+
+                        u = target;
+                        if (u.getPrevious() != null || target == source) {
+                            solveTimer = new AnimationTimerExt(10) {
+                                @Override
+                                public void handle() {
+                                   if (u != null) {
+                                       solveDijkstraPath();
+                                   } else {
+                                       stop();
+                                       updateCanvas();
+                                   }
+                                }
+
+                                @Override
+                                public void renderCanvas() {
+                                    updateCanvas();
+                                }
+                            };
+                            solveTimer.start();
+                        }
+                    }
+                }
+
+                @Override
+                public void renderCanvas() {
+                    updateCanvas();
+                }
+            };
+
+            timer.start();
         } else {
             System.out.println("No maze found...");
         }
     }
 
-    private void solveDijkstra(Cell source, Cell target) {
-        Set<Cell> unvisited = new HashSet<>(cells);
-        source.setDistance(0);
+    private void solveDijkstra() {
+        Cell cell = unvisitedCells
+                .stream()
+                .min(Comparator.comparing(Cell::getDistance))
+                .orElseThrow(NoSuchElementException::new);
 
-        while (!unvisited.isEmpty()) {
-            Cell cell = unvisited
-                    .stream()
-                    .min(Comparator.comparing(Cell::getDistance))
-                    .orElseThrow(NoSuchElementException::new);
+        cell.setVisitedSolved(true);
+        unvisitedCells.remove(cell);
 
-            unvisited.remove(cell);
-
-            if (cell == target) {
-                break;
-            }
-
-            getNeighbours(cell).forEach(c -> {
-                int alt = cell.getDistance() + 1;
-                if (alt < c.getDistance()) {
-                    c.setDistance(alt);
-                    c.setPrevious(cell);
-                }
-            });
+        if (cell == target) {
+            foundTarget = true;
         }
 
-        Cell u = target;
-
-        if (u.getPrevious() != null || target == source) {
-            while (u != null) {
-                u.setPath(true);
-                u = u.getPrevious();
+        getNeighbours(cell).forEach(c -> {
+            int alt = cell.getDistance() + 1;
+            if (alt < c.getDistance()) {
+                c.setVisitedSolved(true);
+                c.setDistance(alt);
+                c.setPrevious(cell);
             }
-        }
+        });
+    }
 
-        updateCanvas();
+    private void solveDijkstraPath() {
+        u.setPath(true);
+        u = u.getPrevious();
     }
 
     private ArrayList<Cell> getNeighbours(Cell cell) {
