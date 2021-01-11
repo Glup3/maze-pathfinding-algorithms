@@ -7,17 +7,17 @@ import javafx.scene.paint.Color;
 import java.util.Stack;
 
 public class MazeClass {
-    final private int TOP = 0;
-    final private int RIGHT = 1;
-    final private int BOTTOM = 2;
-    final private int LEFT = 3;
+    final private static int TOP = 0;
+    final private static int RIGHT = 1;
+    final private static int BOTTOM = 2;
+    final private static int LEFT = 3;
 
     final public static String DFS_REC = "dfs_rec";
     final public static String DFS_ITER = "dfs_iter";
     final public static String BLANK = "blank";
     final private static Color ACTIVE_GEN_SQUARE_COLOR = Color.rgb(0, 200, 0);
     final private static Color VISITED_SQUARE_COLOR = Color.hsb(0, 0.7, 1,1);
-    final private static Color ACTIVE_SEARCH_SQAURE_COLOR = Color.hsb(0, 1, 0.6,1);
+    final private static Color ACTIVE_SEARCH_SQUARE_COLOR = Color.hsb(0, 1, 0.6,1);
 
     public int height;
     public int width;
@@ -27,8 +27,8 @@ public class MazeClass {
     private boolean[][] iterativeVisited = null;
     private int[] currentCell = null;
 
-    public int[] start;
-    public int[] exit;
+    public int[] startingCoords;
+    public int[] exitCoords;
 
     public static MazeSolve solver;
 
@@ -37,8 +37,8 @@ public class MazeClass {
         height = yDimension;
         width = xDimension;
         solver = _solver;
-        start = new int[]{0, 0};
-        exit = new int[]{yDimension - 1, xDimension - 1};
+        startingCoords = new int[]{0, 0};
+        exitCoords = new int[]{yDimension - 1, xDimension - 1};
     }
 
 
@@ -48,12 +48,12 @@ public class MazeClass {
             iterativeVisited = null;
             currentCell = null;
 
-//            solver.is solving or sth
             if (genType == DFS_ITER) {
                 MainApp.informationText = "New Iteration";
             } else if (genType == DFS_REC) {
-                MainApp.informationText = "Canceling Iteration";
+//                MainApp.informationText = "Canceling Iteration";
             }
+
         }
         solver.solveStatus = solver.WAITING;
         boolean[][] visited = new boolean[height][width];
@@ -149,12 +149,13 @@ public class MazeClass {
             for (int y = 0; y < _pathVisited.length; y++) {
                 for (int x = 0; x < _pathVisited[y].length; x++) {
                     if (_pathVisited[y][x]) gc.fillRect(x * cellDim - 1, y * cellDim - 1, cellDim + 1, cellDim + 1);
-//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim-1, y * cellDim-1 , cellDim , cellDim );
+//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim-1, y * cellDim-1 , cellDim , cellDim );                   //drawing is inaccuarate, choose which one looks the best
 //                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim, y * cellDim , cellDim , cellDim );
-//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim - 1, y * cellDim - 1, cellDim + 2, cellDim + 2);      //when not using alpha
+//                    if (_pathVisited[y][x]) gc.fillRect(x * cellDim - 1, y * cellDim - 1, cellDim + 2, cellDim + 2);
+
                 }
             }
-            gc.setFill(ACTIVE_SEARCH_SQAURE_COLOR);
+            gc.setFill(ACTIVE_SEARCH_SQUARE_COLOR);
             gc.fillRect(solver.currPos[1] * cellDim, solver.currPos[0] * cellDim, cellDim, cellDim);
         }
 
