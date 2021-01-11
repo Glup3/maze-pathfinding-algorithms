@@ -25,7 +25,7 @@ public class MainSceneController implements Initializable {
 
     @FXML
     private void showBeta() throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/beta/view/MazeScene2.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/beta/view/MazeScene.fxml"));
         Stage stage = new Stage();
 
         stage.setTitle("Beta Algorithms");

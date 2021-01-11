@@ -12,9 +12,9 @@ import javafx.scene.paint.Color;
 import java.net.URL;
 import java.util.*;
 
-public class MazeScene2Controller implements Initializable {
+public class MazeSceneController implements Initializable {
 
-    public static final int CELL_SIZE = 40;
+    public static final int CELL_SIZE = 10;
 
     @FXML
     private Canvas canvas;
