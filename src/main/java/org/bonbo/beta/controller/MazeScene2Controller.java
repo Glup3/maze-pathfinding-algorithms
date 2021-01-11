@@ -53,27 +53,31 @@ public class MazeScene2Controller implements Initializable {
         cols = Math.floorDiv(width, CELL_SIZE);
 
         resetGrid();
+    }
 
-        timer = new AnimationTimerExt(10) {
+    @FXML
+    private void generateIterative() {
+        resetGrid();
+        cells.get(0).setVisited(true);
+        cellStack.push(cells.get(0));
+
+        timer = new AnimationTimerExt(10, 10) {
             @Override
             public void handle() {
                 if (!cellStack.empty()) {
                     iterativeDFS();
                 } else {
                     generated = true;
+                    updateCanvas();
                     stop();
                 }
+            }
+
+            @Override
+            public void renderCanvas() {
                 updateCanvas();
             }
         };
-    }
-
-    @FXML
-    private void generateIterative() {
-        initCells();
-        cells.get(0).setVisited(true);
-        cellStack.push(cells.get(0));
-
         timer.start();
     }
 
@@ -95,6 +99,32 @@ public class MazeScene2Controller implements Initializable {
         generated = false;
     }
 
+    @FXML
+    private void generateAldousBroder() {
+        resetGrid();
+        current = cells.get(rand.nextInt(cells.size()));
+
+        timer = new AnimationTimerExt(0, 20) {
+            @Override
+            public void handle() {
+                if (!cells.parallelStream().allMatch(Cell::isVisited)) {
+                   aldousBroder();
+                } else {
+                    generated = true;
+                    updateCanvas();
+                    stop();
+                }
+            }
+
+            @Override
+            public void renderCanvas() {
+                updateCanvas();
+            }
+        };
+
+        timer.start();
+    }
+
     private void initCells() {
         cells.clear();
 
@@ -103,6 +133,16 @@ public class MazeScene2Controller implements Initializable {
                 cells.add(Cell.builder().x(x * CELL_SIZE).y(y * CELL_SIZE).build());
             }
         }
+    }
+
+    private void aldousBroder() {
+        Cell cell = getRandomNeighbour(current);
+        if (!cell.isVisited()) {
+            removeWalls(current, cell);
+            cell.setVisited(true);
+        }
+
+        current = cell;
     }
 
     private void recursiveDFS(Cell cell) {
@@ -293,6 +333,24 @@ public class MazeScene2Controller implements Initializable {
         }
 
         return neighbours;
+    }
+
+    private Cell getRandomNeighbour(Cell cell) {
+        int i = -1;
+
+        while (i == -1) {
+            int r = rand.nextInt(4);
+
+            i = switch (r) {
+                case 0 -> (index(cell, Positions.TOP));
+                case 1 -> (index(cell, Positions.RIGHT));
+                case 2 -> (index(cell, Positions.BOTTOM));
+                case 3 -> (index(cell, Positions.LEFT));
+                default -> -1;
+            };
+        }
+
+        return cells.get(i);
     }
 
     private enum Positions {
