@@ -28,7 +28,7 @@ public abstract class AnimationTimerExt extends AnimationTimer {
 
         prevTime = now;
 
-        for (int i = 0; i <= skipSteps; i++) {
+        for (int i = 0; i <= skipSteps && !isDone(); i++) {
             handle();
         }
 
@@ -38,5 +38,7 @@ public abstract class AnimationTimerExt extends AnimationTimer {
     public abstract void handle();
 
     public abstract void renderCanvas();
+
+    public abstract boolean isDone();
 
 }

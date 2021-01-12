@@ -33,7 +33,7 @@ public class Main extends Application {
     }
 
     public void quickStartBeta(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/beta/view/MazeScene.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/beta/view/MazeScene2.fxml"));
 
         stage.setTitle("Beta Algorithms");
         stage.setScene(new Scene(root));

@@ -91,6 +91,11 @@ public class MazeSceneController implements Initializable {
             public void renderCanvas() {
                 updateCanvas(canvas.getGraphicsContext2D());
             }
+
+            @Override
+            public boolean isDone() {
+                return generated;
+            }
         };
         timer.start();
     }
@@ -108,7 +113,6 @@ public class MazeSceneController implements Initializable {
         if (timer != null) {
             timer.stop();
         }
-        initCells();
         updateCanvas(canvas.getGraphicsContext2D());
         generated = false;
     }
@@ -134,19 +138,14 @@ public class MazeSceneController implements Initializable {
             public void renderCanvas() {
                 updateCanvas(canvas.getGraphicsContext2D());
             }
+
+            @Override
+            public boolean isDone() {
+                return generated;
+            }
         };
 
         timer.start();
-    }
-
-    private void initCells() {
-        cells.clear();
-
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++) {
-                cells.add(Cell.builder().x(x * CELL_SIZE).y(y * CELL_SIZE).build());
-            }
-        }
     }
 
     private void aldousBroder() {
@@ -319,6 +318,11 @@ public class MazeSceneController implements Initializable {
                                 public void renderCanvas() {
                                     updateCanvas(canvas2.getGraphicsContext2D());
                                 }
+
+                                @Override
+                                public boolean isDone() {
+                                    return generated;
+                                }
                             };
                             solveTimer.start();
                         }
@@ -328,6 +332,11 @@ public class MazeSceneController implements Initializable {
                 @Override
                 public void renderCanvas() {
                     updateCanvas(canvas2.getGraphicsContext2D());
+                }
+
+                @Override
+                public boolean isDone() {
+                    return generated;
                 }
             };
 
@@ -441,6 +450,11 @@ public class MazeSceneController implements Initializable {
                             public void renderCanvas() {
                                 updateCanvas(canvas2.getGraphicsContext2D());
                             }
+
+                            @Override
+                            public boolean isDone() {
+                                return generated;
+                            }
                         };
 
                         solveTimer.start();
@@ -450,6 +464,11 @@ public class MazeSceneController implements Initializable {
                 @Override
                 public void renderCanvas() {
                     updateCanvas(canvas2.getGraphicsContext2D());
+                }
+
+                @Override
+                public boolean isDone() {
+                    return generated;
                 }
             };
 
