@@ -34,7 +34,7 @@ public class Cell {
     private boolean isPath;
     
     public void draw(GraphicsContext gc) {
-        gc.setLineWidth(1.0);
+        gc.setLineWidth(2.0);
         gc.setStroke(Color.WHITE);
         int size = MazeSceneController.CELL_SIZE;
 

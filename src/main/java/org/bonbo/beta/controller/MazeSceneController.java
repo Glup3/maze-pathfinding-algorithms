@@ -14,12 +14,13 @@ import java.util.*;
 
 public class MazeSceneController implements Initializable {
 
-    public static final int CELL_SIZE = 10;
+    public static final int CELL_SIZE = 40;
 
     @FXML
     private Canvas canvas;
 
-    private GraphicsContext gc;
+    @FXML
+    private Canvas canvas2;
 
     private final Random rand = new Random();
 
@@ -55,7 +56,6 @@ public class MazeSceneController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        gc = canvas.getGraphicsContext2D();
         cells = new ArrayList<>();
         cellStack = new Stack<>();
         height = (int) canvas.getHeight();
@@ -80,14 +80,14 @@ public class MazeSceneController implements Initializable {
                     iterativeDFS();
                 } else {
                     generated = true;
-                    updateCanvas();
+                    updateCanvas(canvas.getGraphicsContext2D());
                     stop();
                 }
             }
 
             @Override
             public void renderCanvas() {
-                updateCanvas();
+                updateCanvas(canvas.getGraphicsContext2D());
             }
         };
         timer.start();
@@ -97,7 +97,7 @@ public class MazeSceneController implements Initializable {
     private void generateRecursive() {
         resetGrid();
         recursiveDFS(cells.get(0));
-        updateCanvas();
+        updateCanvas(canvas.getGraphicsContext2D());
         generated = true;
     }
 
@@ -107,7 +107,7 @@ public class MazeSceneController implements Initializable {
             timer.stop();
         }
         initCells();
-        updateCanvas();
+        updateCanvas(canvas.getGraphicsContext2D());
         generated = false;
     }
 
@@ -123,14 +123,14 @@ public class MazeSceneController implements Initializable {
                    aldousBroder();
                 } else {
                     generated = true;
-                    updateCanvas();
+                    updateCanvas(canvas.getGraphicsContext2D());
                     stop();
                 }
             }
 
             @Override
             public void renderCanvas() {
-                updateCanvas();
+                updateCanvas(canvas.getGraphicsContext2D());
             }
         };
 
@@ -180,7 +180,7 @@ public class MazeSceneController implements Initializable {
         }
     }
 
-    private void updateCanvas() {
+    private void updateCanvas(GraphicsContext gc) {
         gc.clearRect(0, 0, width, height);
 
         for (Cell cell : cells) {
@@ -309,13 +309,13 @@ public class MazeSceneController implements Initializable {
                                        solveDijkstraPath();
                                    } else {
                                        stop();
-                                       updateCanvas();
+                                       updateCanvas(canvas2.getGraphicsContext2D());
                                    }
                                 }
 
                                 @Override
                                 public void renderCanvas() {
-                                    updateCanvas();
+                                    updateCanvas(canvas2.getGraphicsContext2D());
                                 }
                             };
                             solveTimer.start();
@@ -325,7 +325,7 @@ public class MazeSceneController implements Initializable {
 
                 @Override
                 public void renderCanvas() {
-                    updateCanvas();
+                    updateCanvas(canvas2.getGraphicsContext2D());
                 }
             };
 
