@@ -36,6 +36,8 @@ public class MazeSceneController implements Initializable {
 
     private Stack<Cell> cellStack;
 
+    private Queue<Cell> cellQueue;
+
     private Cell current;
 
     private Cell target;
@@ -406,4 +408,71 @@ public class MazeSceneController implements Initializable {
         BOTTOM,
         LEFT
     }
+
+    @FXML
+    private void solveBFS() {
+        cellQueue = new LinkedList<>();
+        current = cells.get(0);
+        target = cells.get(cells.size() - 1);
+        current.setVisitedSolved(true);
+        cellQueue.add(current);
+
+        if (generated) {
+            timer = new AnimationTimerExt(10) {
+                @Override
+                public void handle() {
+                    if (!cellQueue.isEmpty()) {
+                        bfs();
+                    } else {
+                        stop();
+                        u = target.getPrevious();
+                        solveTimer = new AnimationTimerExt(10) {
+                            @Override
+                            public void handle() {
+                                if (u.getPrevious() != null) {
+                                    solveDijkstraPath();
+                                } else {
+                                    stop();
+                                    updateCanvas(canvas2.getGraphicsContext2D());
+                                }
+                            }
+
+                            @Override
+                            public void renderCanvas() {
+                                updateCanvas(canvas2.getGraphicsContext2D());
+                            }
+                        };
+
+                        solveTimer.start();
+                    }
+                }
+
+                @Override
+                public void renderCanvas() {
+                    updateCanvas(canvas2.getGraphicsContext2D());
+                }
+            };
+
+            timer.start();
+        } else {
+            System.out.println("No Maze found...");
+        }
+    }
+
+    private void bfs() {
+        Cell v = cellQueue.remove();
+
+        if (v == target) {
+            cellQueue.clear();
+        } else {
+            for (Cell w : getNeighbours(v)) {
+                if (!w.isVisitedSolved()) {
+                    w.setVisitedSolved(true);
+                    w.setPrevious(v);
+                    cellQueue.add(w);
+                }
+            }
+        }
+    }
+
 }

@@ -14,12 +14,13 @@
          <Button mnemonicParsing="false" onAction="#generateIterative" text="Generate Iterative" />
          <Button mnemonicParsing="false" onAction="#generateAldousBroder" text="Aldous Broder" />
          <Button mnemonicParsing="false" onAction="#solve" text="Solve" />
+         <Button mnemonicParsing="false" onAction="#solveBFS" text="Solve BFS" />
       </HBox>
    </bottom>
    <center>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <Canvas fx:id="canvas" height="600.0" width="600.0"/>
-         <Canvas fx:id="canvas2" height="600.0" width="600.0"/>
+         <Canvas fx:id="canvas" height="600.0" width="600.0" />
+         <Canvas fx:id="canvas2" height="600.0" width="600.0" />
       </StackPane>
    </center>
 </BorderPane>
