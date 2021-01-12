@@ -5,6 +5,12 @@ import java.util.Stack;
 
 public class MazeGenerator {
 
+    public enum GenStatus {
+        NOT_STARTED,
+        IN_PROCESS,
+        DONE
+    }
+
     private static MazeClass maze;
 
     final public String DFS_REC = "dfs_rec";
@@ -14,27 +20,19 @@ public class MazeGenerator {
     public boolean[][] iterativeVisited = null;
     public int[] currentCell = null;
 
-    public MazeClass.GenStatus genStatus = MazeClass.GenStatus.NOT_STARTED;
+    public GenStatus genStatus = GenStatus.NOT_STARTED;
 
     public MazeGenerator(MazeClass _maze) {
         maze = _maze;
     }
 
-    public void generateMaze(String genType) {
-        if (!iterativeStack.isEmpty()) {
-            iterativeStack = new Stack<>();
-            iterativeVisited = null;
-            currentCell = null;
+    public void generateNewMaze(String genType) {
+        genStatus = GenStatus.NOT_STARTED;
 
-            if (genType.equals(DFS_ITER)) {
-                maze.mainApp.setInformationText("New Iteration");
-            } else if (genType.equals(DFS_REC)) {
-                maze.mainApp.setInformationText("Canceling Iteration");        //useless for now
-            }
-
-        }
         maze.solver.solveStatus = MazeSolver.SolveStatus.WAITING;
+
         boolean[][] visited = new boolean[maze.height][maze.width];
+
         maze.walls = new boolean[maze.height][maze.width][4];          //would be more efficient to use inverted values, so initialization doesnt have to happen, but this is more intuitive
         for (int y = 0; y < maze.height; y++) {
             for (boolean[] row : maze.walls[y]) {
@@ -45,11 +43,13 @@ public class MazeGenerator {
             case DFS_REC:
                 dfsRecursiveGeneration(0, 0, visited);
                 maze.mainApp.setInformationText("Generated recursively");
+                maze.solveable = true;
                 break;
             case DFS_ITER:
                 startIterativeGeneration(0, 0);
                 break;
             case BLANK:
+                maze.solveable = false;
                 break;
             default:
                 System.out.println("Invalid generation type");
@@ -76,7 +76,8 @@ public class MazeGenerator {
         iterativeStack.push(new int[]{startY, startX});
         iterativeVisited = new boolean[maze.height][maze.width];
         iterativeVisited[startY][startX] = true;
-        genStatus = MazeClass.GenStatus.IN_PROCESS;
+        genStatus = GenStatus.IN_PROCESS;
+        iterativeGeneration();
     }
 
     public void iterativeGeneration() {
@@ -97,10 +98,11 @@ public class MazeGenerator {
                 }
             }
             currentCell = currCell;
-        } else if (genStatus == MazeClass.GenStatus.IN_PROCESS) {
+        } else if (genStatus == GenStatus.IN_PROCESS) {
             maze.mainApp.setInformationText("Generated Iteratively");
-            genStatus = MazeClass.GenStatus.DONE;
+            genStatus = GenStatus.DONE;
             currentCell = null;
+            maze.solveable = true;
         }
     }
 

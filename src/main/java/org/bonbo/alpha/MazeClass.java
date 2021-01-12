@@ -14,11 +14,7 @@ public class MazeClass {
     }
 
 
-    public enum GenStatus {
-        NOT_STARTED,
-        IN_PROCESS,
-        DONE
-    }
+
 
 
     final private Color ACTIVE_GEN_SQUARE_COLOR = Color.rgb(0, 200, 0);
@@ -32,6 +28,7 @@ public class MazeClass {
     public int width;
     public boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
 
+    public boolean solveable = false;
 
     public int[] startingCoords;
     public int[] exitCoords;
@@ -60,7 +57,7 @@ public class MazeClass {
         gc.fillRect(0, 0, _canvas.getWidth(), _canvas.getHeight());
 
         //Draw filled squares for generating or solving
-        if (mazeGenerator.genStatus == GenStatus.IN_PROCESS) {
+        if (mazeGenerator.genStatus == mazeGenerator.genStatus.IN_PROCESS) {
             gc.setFill(ACTIVE_GEN_SQUARE_COLOR);
             gc.fillRect(mazeGenerator.currentCell[1] * cellDim, mazeGenerator.currentCell[0] * cellDim, cellDim, cellDim);
         } else if (solver.solveStatus != MazeSolver.SolveStatus.WAITING) {
@@ -76,7 +73,7 @@ public class MazeClass {
                 }
             }
             gc.setFill(ACTIVE_SEARCH_SQUARE_COLOR);
-            gc.fillRect(solver.currPos[1] * cellDim, solver.currPos[0] * cellDim, cellDim, cellDim);
+            gc.fillRect(solver.currSLPos[1] * cellDim, solver.currSLPos[0] * cellDim, cellDim, cellDim);
         }
 
         //Draw shortest path

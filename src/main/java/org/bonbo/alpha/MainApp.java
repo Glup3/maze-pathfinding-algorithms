@@ -9,6 +9,7 @@ import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.*;
 import javafx.scene.canvas.*;
 import javafx.stage.Stage;
@@ -20,9 +21,46 @@ import javafx.scene.paint.*;
 
 public class MainApp implements EventHandler<ActionEvent> {
 
+    private enum Speed {
+        STOP, SLOW, FAST, VERY_FAST, INSTANT;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case STOP -> "Stop";
+                case SLOW -> "Slow";
+                case FAST -> "Fast";
+                case VERY_FAST -> "Very Fast";
+                case INSTANT -> "Instant";
+            };
+        }
+
+        private int getLoops(){
+            return switch(this) {
+                case STOP -> 0;
+                case SLOW -> 3;
+                case FAST -> 20;
+                case VERY_FAST -> 50;
+                case INSTANT -> 10000000;//Integer.MAX_VALUE;
+            };
+        }
+
+        private static Speed fromInt(int val) {
+            return switch(val) {          //works but not elegant
+                case 0 -> STOP;
+                case 1 -> SLOW;
+                case 2 -> FAST;
+                case 3 -> VERY_FAST;
+                case 4 -> INSTANT;
+                default-> STOP;
+            };
+        }
+    }
+
+
     final private Color _DARKGREY = Color.rgb(50, 50, 50);
 
-    final private int ITERATION_SPEED = 20;       //how many iterations are done per frame TODO: make slider
+//    final String[] speedStrings = new String[] {"Stop", "Slow", "Fast", "Very Fast", "Instant"};
 
     private MazeClass maze;
 
@@ -42,6 +80,9 @@ public class MainApp implements EventHandler<ActionEvent> {
 
     private Label infoTextLabel;
     public ComboBox<String> solveComboBox;
+    private Slider speedSlider;
+    private Label speedTextLabel;
+    private Speed iterSpeed = Speed.VERY_FAST;
 
     private String informationText = "Waiting for Input";
 
@@ -70,10 +111,10 @@ public class MainApp implements EventHandler<ActionEvent> {
         initHBoxes();
 
         //******** Maze Object ********
-        maze = new MazeClass(50, 50, this);       //TODO make grid size dynamic with slider
+        maze = new MazeClass(100, 100, this);       //TODO make grid size dynamic with slider
         maze.solver = new MazeSolver(maze);
         maze.mazeGenerator = new MazeGenerator(maze);
-        maze.mazeGenerator.generateMaze(maze.mazeGenerator.BLANK);
+        maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.BLANK);
 
 
         initButtons();
@@ -93,12 +134,11 @@ public class MainApp implements EventHandler<ActionEvent> {
                 infoTextLabel.setText(informationText);
                 double hPadding = (window.getWidth() - Math.max(canvas.getWidth(), buttonBox.getWidth())) * 0.5 - GENERAL_PADDING * 0.5;
                 layout.setPadding(new Insets(GENERAL_PADDING, hPadding, GENERAL_PADDING, hPadding));
-                for (int i = 0; i < ITERATION_SPEED; i++) {
-                    maze.solver.continueSolve();
-                    maze.mazeGenerator.iterativeGeneration();
-                }
+                speedTextLabel.setText("Speed:\n" + iterSpeed.toString());
+                int loopsToDo = iterSpeed.getLoops();
+                for (int i = 0; i < loopsToDo && maze.solver.solveStatus == MazeSolver.SolveStatus.SOLVING; i++)   maze.solver.continueSolve();
+                for (int i = 0; i < loopsToDo && maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS; i++)   maze.mazeGenerator.iterativeGeneration();
                 maze.drawMaze(gc);
-
             }
         }.start();
     }
@@ -122,14 +162,14 @@ public class MainApp implements EventHandler<ActionEvent> {
         recursiveButton = new Button();
         recursiveButton.setText("Generate Recursively");
         recursiveButton.setStyle(buttonStyle);
-        recursiveButton.setOnAction(e -> maze.mazeGenerator.generateMaze(maze.mazeGenerator.DFS_REC));
+        recursiveButton.setOnAction(e -> maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.DFS_REC));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
         iterativeButton = new Button();
         iterativeButton.setText("Generate Iteratively");
         iterativeButton.setStyle(buttonStyle);
-        iterativeButton.setOnAction(e -> maze.mazeGenerator.generateMaze(maze.mazeGenerator.DFS_ITER));
+        iterativeButton.setOnAction(e -> maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.DFS_ITER));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
@@ -150,8 +190,7 @@ public class MainApp implements EventHandler<ActionEvent> {
         //******** Info Text Label ********
         infoTextLabel = new Label();
         infoTextLabel.setStyle(buttonStyle + "-fx-text-fill: white;");
-        infoTextLabel.setAlignment(Pos.CENTER_LEFT);        //useless?
-        GridPane.setConstraints(infoTextLabel, 0, 2);
+//        infoTextLabel.setAlignment(Pos.CENTER_LEFT);        //useless?
 
 
         //******** Solve Selection ********
@@ -159,6 +198,16 @@ public class MainApp implements EventHandler<ActionEvent> {
         solveComboBox.setPromptText("Choose solving Algorithm");
         solveComboBox.setStyle(smallerButtonStyle);
         solveComboBox.setOnAction(e -> maze.solver.setCurrentSolveMethod());
+
+        speedTextLabel = new Label("Speed:");
+        speedTextLabel.setStyle(smallerButtonStyle + "-fx-text-fill: white;");
+
+        speedSlider = new Slider(0, Speed.values().length - 1, Speed.values().length - 2);
+        speedSlider.setSnapToTicks(true);
+        speedSlider.setShowTickMarks(true);
+        speedSlider.setMajorTickUnit(1);
+        speedSlider.setMinorTickCount(0);
+        speedSlider.setOnMouseReleased(e -> iterSpeed = Speed.fromInt((int) speedSlider.getValue()));
     }
 
     private void initCanvas() {
@@ -188,7 +237,7 @@ public class MainApp implements EventHandler<ActionEvent> {
     private void initStage() {
         //******** Scene and Stage ********
         buttonBox.getChildren().addAll(recursiveButton, iterativeButton, solveButton);
-        secondBox.getChildren().addAll(infoTextLabel, solveComboBox);
+        secondBox.getChildren().addAll(infoTextLabel, solveComboBox, speedTextLabel, speedSlider);
         layout.getChildren().addAll(canvas, buttonBox, secondBox);
         Group root = new Group(layout);
         Scene scene = new Scene(root, INITIAL_SCENE_WIDTH, INITIAL_SCENE_HEIGHT, _DARKGREY);

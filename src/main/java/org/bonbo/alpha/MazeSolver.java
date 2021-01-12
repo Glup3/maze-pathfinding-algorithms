@@ -14,7 +14,7 @@ public class MazeSolver {
 
     final private int[][] deltas = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-    final public String STAY_LEFT = "Stay Left";
+    final public String STAY_LEFT = "Stay Left";            //TODO make into enum or make separate classes for algs
     final public String DIJKSTRA = "Dijkstra";
 
     public ObservableList<String> solveOptions = FXCollections.observableArrayList(STAY_LEFT, DIJKSTRA);
@@ -23,14 +23,18 @@ public class MazeSolver {
 
     public SolveStatus solveStatus = SolveStatus.WAITING;
 
+    //Values shared by algorithms
     public boolean[][] visited;
-    public int[] currPos;
-    public int currDir;
+    public LinkedList<int[]> shortestPath = new LinkedList<>();
+
+    //Stay Left
+    public int[] currSLPos;
+    public int currSLDir;
 
     //Dijkstra
-    private int[][] tentativeDistance;
+    private int[][] tentDist;       //tentative distance
     public int[][][] prevNode;
-    public LinkedList<int[]> shortestPath = new LinkedList<>();
+
 
     final private MazeClass maze;
 
@@ -44,10 +48,14 @@ public class MazeSolver {
     }
 
     public void startNewSolve() {
+        if (maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS) {
+            maze.mainApp.setInformationText("Generation in Process!");
+            return;
+        }
         maze.mainApp.setInformationText("Solving...");
-        currDir = 1;
+        currSLDir = 1;
         visited = new boolean[maze.height][maze.width];
-        currPos = maze.startingCoords;
+        currSLPos = maze.startingCoords;
         solveStatus = SolveStatus.SOLVING;
         shortestPath.clear();
         if (Objects.equals(currentSolveMethod, DIJKSTRA)) initDijkstra();
@@ -56,7 +64,7 @@ public class MazeSolver {
     }
 
     public void continueSolve() {
-        if (solveStatus == SolveStatus.SOLVING) {
+        if (solveStatus == SolveStatus.SOLVING && maze.solveable) {
             if (Objects.equals(currentSolveMethod, STAY_LEFT)) {
                 followLeft();//switch doesnt work, because apparently not constant (at compile time or something)
             } else if (Objects.equals(currentSolveMethod, DIJKSTRA)) {
@@ -70,21 +78,21 @@ public class MazeSolver {
 
     public void followLeft() {
         if (solveStatus == SolveStatus.SOLVING) {
-            shortestPath.add(currPos);
-            int y = currPos[0], x = currPos[1];
+            shortestPath.add(currSLPos);
+            int y = currSLPos[0], x = currSLPos[1];
             for (int rotation : new int[]{3, 0, 1, 2}) { //int rotation = 3; rotation >= 0; rotation--) {                      //preferentially go RELATIVELY left (-1 or +3) else forward (+0) else right (+1) else backward (+2)
-                if (!maze.walls[y][x][(currDir + rotation) % 4]) {    //no wall is blocking move
-                    currDir = (currDir + rotation) % 4;
-                    currPos = new int[]{y + deltas[currDir][0], x + deltas[currDir][1]};
+                if (!maze.walls[y][x][(currSLDir + rotation) % 4]) {    //no wall is blocking move
+                    currSLDir = (currSLDir + rotation) % 4;
+                    currSLPos = new int[]{y + deltas[currSLDir][0], x + deltas[currSLDir][1]};
 //                    System.out.println("moving in dir " + currDir + " from {y,x}: {" + y + ", " + x + "}    to {" + currPos[0] + ", " + currPos[1] + "}");
                     visited[y][x] = true;
                     break;
                 }
             }
-            if (Arrays.equals(currPos, maze.exitCoords)) {
-                shortestPath.add(currPos);
+            if (Arrays.equals(currSLPos, maze.exitCoords)) {
+                shortestPath.add(currSLPos);
                 solveStatus = SolveStatus.SOLVED;
-                maze.mainApp.setInformationText("Solved!");
+                maze.mainApp.setInformationText("Solved by stay left");
             }
         }
     }
@@ -92,33 +100,33 @@ public class MazeSolver {
 
     public void initDijkstra() {
         maze.mainApp.setInformationText("INIT DIJKSTRA");
-        tentativeDistance = new int[maze.height][maze.width];
+        tentDist = new int[maze.height][maze.width];
         prevNode = new int[maze.height][maze.width][2];
-        for (int[] row : tentativeDistance) {
+        for (int[] row : tentDist) {
             Arrays.fill(row, Integer.MAX_VALUE);
         }
-        tentativeDistance[maze.startingCoords[1]][maze.startingCoords[0]] = 0;
+        tentDist[maze.startingCoords[1]][maze.startingCoords[0]] = 0;
     }
 
     public void dijkstra() {
         int minDist = Integer.MAX_VALUE;                        //find cell with min dist and not visited
-        for (int i = 0; i < tentativeDistance.length; i++) {
-            for (int j = 0; j < tentativeDistance[i].length; j++) {
-                if (!visited[i][j] && tentativeDistance[i][j] < minDist) {
-                    minDist = tentativeDistance[i][j];
-                    currPos = new int[]{i, j};
+        for (int i = 0; i < tentDist.length; i++) {
+            for (int j = 0; j < tentDist[i].length; j++) {
+                if (!visited[i][j] && tentDist[i][j] < minDist) {
+                    minDist = tentDist[i][j];
+                    currSLPos = new int[]{i, j};
                 }
             }
         }
         //Update neighbor distance
-        int y = currPos[0], x = currPos[1];
+        int y = currSLPos[0], x = currSLPos[1];
         for (int i = 0; i < deltas.length; i++) {
             for (int dir = 0; dir < 4; dir++) {
                 if (!maze.walls[y][x][dir]) {            //WILL BE PROBLEM IF START AND EXIT POINT HAVE OPEN WALLS
                     int nY = y + deltas[dir][0], nX = x + deltas[dir][1];
                     if (!visited[nY][nX]) {
-                        if (tentativeDistance[y][x] + 1 < tentativeDistance[nY][nX]) {
-                            tentativeDistance[nY][nX] = tentativeDistance[y][x] + 1;                        //distances between all nodes are 1
+                        if (tentDist[y][x] + 1 < tentDist[nY][nX]) {
+                            tentDist[nY][nX] = tentDist[y][x] + 1;                        //distances between all nodes are 1
                             prevNode[nY][nX] = new int[]{y, x};
                         }
                     }
@@ -127,14 +135,14 @@ public class MazeSolver {
         }
         visited[y][x] = true;       //check if done
         if (maze.exitCoords[0] == y && maze.exitCoords[1] == x) {
-            shortestPath.add(maze.exitCoords);
-            int[] backtrack = prevNode[y][x];
+//            shortestPath.add(maze.exitCoords);
+            int[] backtrack = new int[]{y,x};
             while (backtrack[0] != 0 || backtrack[1] != 0) {
                 shortestPath.add(backtrack);
                 backtrack = prevNode[backtrack[0]][backtrack[1]];
             }
             shortestPath.add(maze.startingCoords);
-            maze.mainApp.setInformationText("Dijkstra Solve");
+            maze.mainApp.setInformationText("Dijkstra Solution");
             solveStatus = SolveStatus.SOLVED;
         }
     }
