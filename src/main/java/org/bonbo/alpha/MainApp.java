@@ -19,6 +19,9 @@ import javafx.scene.paint.*;
  * ALL COORDINATES ARE SAVED AS [y][x] WHERE [0][0] IS THE TOP LEFT CORNER
  **/
 
+
+//TODO maybe make maze structure when walls are full blocks, idk if necessary, read wikipedia
+
 public class MainApp implements EventHandler<ActionEvent> {
 
     private enum Speed {
@@ -57,10 +60,7 @@ public class MainApp implements EventHandler<ActionEvent> {
         }
     }
 
-
     final private Color _DARKGREY = Color.rgb(50, 50, 50);
-
-//    final String[] speedStrings = new String[] {"Stop", "Slow", "Fast", "Very Fast", "Instant"};
 
     private MazeClass maze;
 
@@ -84,8 +84,7 @@ public class MainApp implements EventHandler<ActionEvent> {
     private Label speedTextLabel;
     private Speed iterSpeed = Speed.VERY_FAST;
 
-    private String informationText = "Waiting for Input";
-
+    //Dimensions
     private int INITIAL_SCENE_WIDTH;
     private int INITIAL_SCENE_HEIGHT;
     private int MIN_INITIAL_DIM;
@@ -93,7 +92,6 @@ public class MainApp implements EventHandler<ActionEvent> {
 
     private String buttonStyle;
     private String smallerButtonStyle;
-
 
     public MainApp(Stage stage) {
         start(stage);
@@ -114,7 +112,7 @@ public class MainApp implements EventHandler<ActionEvent> {
         maze = new MazeClass(100, 100, this);       //TODO make grid size dynamic with slider
         maze.solver = new MazeSolver(maze);
         maze.mazeGenerator = new MazeGenerator(maze);
-        maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.BLANK);
+        maze.mazeGenerator.genNewMaze(maze.mazeGenerator.BLANK);
 
 
         initButtons();
@@ -131,13 +129,12 @@ public class MainApp implements EventHandler<ActionEvent> {
             public void handle(long now) {
 //                System.out.print("-");
                 gc.clearRect(0, 0, window.getWidth(), window.getHeight());
-                infoTextLabel.setText(informationText);
                 double hPadding = (window.getWidth() - Math.max(canvas.getWidth(), buttonBox.getWidth())) * 0.5 - GENERAL_PADDING * 0.5;
                 layout.setPadding(new Insets(GENERAL_PADDING, hPadding, GENERAL_PADDING, hPadding));
                 speedTextLabel.setText("Speed:\n" + iterSpeed.toString());
                 int loopsToDo = iterSpeed.getLoops();
                 for (int i = 0; i < loopsToDo && maze.solver.solveStatus == MazeSolver.SolveStatus.SOLVING; i++)   maze.solver.continueSolve();
-                for (int i = 0; i < loopsToDo && maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS; i++)   maze.mazeGenerator.iterativeGeneration();
+                for (int i = 0; i < loopsToDo && maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS; i++)   maze.mazeGenerator.dfsIterativeGen();
                 maze.drawMaze(gc);
             }
         }.start();
@@ -162,14 +159,14 @@ public class MainApp implements EventHandler<ActionEvent> {
         recursiveButton = new Button();
         recursiveButton.setText("Generate Recursively");
         recursiveButton.setStyle(buttonStyle);
-        recursiveButton.setOnAction(e -> maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.DFS_REC));
+        recursiveButton.setOnAction(e -> maze.mazeGenerator.genNewMaze(maze.mazeGenerator.DFS_REC));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
         iterativeButton = new Button();
         iterativeButton.setText("Generate Iteratively");
         iterativeButton.setStyle(buttonStyle);
-        iterativeButton.setOnAction(e -> maze.mazeGenerator.generateNewMaze(maze.mazeGenerator.DFS_ITER));
+        iterativeButton.setOnAction(e -> maze.mazeGenerator.genNewMaze(maze.mazeGenerator.DFS_ITER));
 
         //-  -  -  -  -  -  -  -  -  -  -  -  -
 
@@ -226,7 +223,8 @@ public class MainApp implements EventHandler<ActionEvent> {
         INITIAL_SCENE_WIDTH = dim;
         INITIAL_SCENE_HEIGHT = dim;
 
-        MIN_INITIAL_DIM = Math.min(INITIAL_SCENE_WIDTH, INITIAL_SCENE_HEIGHT);      //TODO: make dimensions of everything dynamic - dependant on window size
+//        MIN_INITIAL_DIM = Math.min(INITIAL_SCENE_WIDTH, INITIAL_SCENE_HEIGHT);      //TODO: make dimensions of everything dynamic - dependant on window size
+        MIN_INITIAL_DIM = dim;
         GENERAL_PADDING = MIN_INITIAL_DIM / 50;
 
         buttonStyle = "-fx-font-size: " + (float) MIN_INITIAL_DIM / 400 + "em;-fx-background-radius: 8,7,6;";
@@ -246,7 +244,7 @@ public class MainApp implements EventHandler<ActionEvent> {
     }
 
     public void setInformationText(String text) {
-        informationText = text;
+        infoTextLabel.setText(text);
     }
 
 

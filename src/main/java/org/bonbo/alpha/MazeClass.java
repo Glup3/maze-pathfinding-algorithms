@@ -4,6 +4,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MazeClass {
     public enum Dir {
@@ -12,10 +14,6 @@ public class MazeClass {
         BOTTOM,
         LEFT
     }
-
-
-
-
 
     final private Color ACTIVE_GEN_SQUARE_COLOR = Color.rgb(0, 200, 0);
     final private Color VISITED_SQUARE_COLOR = Color.hsb(0, 0.7, 1, 1);
@@ -28,7 +26,9 @@ public class MazeClass {
     public int width;
     public boolean[][][] walls;    //[TOP, LEFT, BOTTOM, RIGHT], [0][0] is top left corner
 
-    public boolean solveable = false;
+    public boolean solvable = false;
+
+    final public int[][] deltas = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
     public int[] startingCoords;
     public int[] exitCoords;
@@ -57,7 +57,7 @@ public class MazeClass {
         gc.fillRect(0, 0, _canvas.getWidth(), _canvas.getHeight());
 
         //Draw filled squares for generating or solving
-        if (mazeGenerator.genStatus == mazeGenerator.genStatus.IN_PROCESS) {
+        if (mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS) {
             gc.setFill(ACTIVE_GEN_SQUARE_COLOR);
             gc.fillRect(mazeGenerator.currentCell[1] * cellDim, mazeGenerator.currentCell[0] * cellDim, cellDim, cellDim);
         } else if (solver.solveStatus != MazeSolver.SolveStatus.WAITING) {
@@ -73,7 +73,7 @@ public class MazeClass {
                 }
             }
             gc.setFill(ACTIVE_SEARCH_SQUARE_COLOR);
-            gc.fillRect(solver.currSLPos[1] * cellDim, solver.currSLPos[0] * cellDim, cellDim, cellDim);
+            gc.fillRect(solver.currPos[1] * cellDim, solver.currPos[0] * cellDim, cellDim, cellDim);
         }
 
         //Draw shortest path
@@ -111,6 +111,40 @@ public class MazeClass {
         gc.restore();
     }
 
+    public ArrayList<int[]> getPossibleNeighbors(int y, int x) {
+        ArrayList<int[]> neighbors = new ArrayList<>(Arrays.asList(new int[][]{{y - 1, x, dir2idx(MazeClass.Dir.TOP)},
+                {y + 1, x, dir2idx(MazeClass.Dir.BOTTOM)},
+                {y, x - 1, dir2idx(MazeClass.Dir.LEFT)},
+                {y, x + 1, dir2idx(MazeClass.Dir.RIGHT)}}));
+
+        for (int i = 0; i < neighbors.size(); i++) {
+            int[] coords = neighbors.get(i);
+            if (!((coords[0] >= 0) && (coords[0] < height) && (coords[1] >= 0) && (coords[1] < width)))
+                neighbors.remove(i--);
+        }
+        return neighbors;
+    }
+
+    public ArrayList<int[]> getAccessibleNeighbors(int y, int x) {
+        ArrayList<int[]> neighbors = new ArrayList<>();
+        for(int dir = 0; dir < deltas.length;dir++) {
+            if (!walls[y][x][dir]) {            //WILL BE PROBLEM IF START AND EXIT POINT HAVE OPEN WALLS
+                int nY = y + deltas[dir][0], nX = x + deltas[dir][1];
+                neighbors.add(new int[]{nY, nX});
+            }
+        }
+        return neighbors;
+    }
+
+
+    public static void arrListShuffle2D(ArrayList<int[]> arr) {
+        for (int i = arr.size() - 1; i > 0; i--) {
+            int j = (int) (Math.random() * (i + 1));    //Random gen
+            int[] temp = arr.get(j); // Simple swap
+            arr.set(j, arr.get(i));
+            arr.set(i, temp);
+        }
+    }
 
     public int dir2idx(Dir direction) {
         return switch (direction) {

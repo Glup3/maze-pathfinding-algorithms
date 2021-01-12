@@ -17,7 +17,7 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception  {
 //        startMain(stage);
          quickStartAlpha(stage);
-        // quickStartBeta(stage);
+//         quickStartBeta(stage);
     }
 
     public void startMain(Stage stage) throws Exception {

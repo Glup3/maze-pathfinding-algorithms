@@ -1,5 +1,6 @@
 package org.bonbo.alpha;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
 
@@ -26,7 +27,7 @@ public class MazeGenerator {
         maze = _maze;
     }
 
-    public void generateNewMaze(String genType) {
+    public void genNewMaze(String genType) {
         genStatus = GenStatus.NOT_STARTED;
 
         maze.solver.solveStatus = MazeSolver.SolveStatus.WAITING;
@@ -40,58 +41,54 @@ public class MazeGenerator {
             }
         }
         switch (genType) {
-            case DFS_REC:
-                dfsRecursiveGeneration(0, 0, visited);
+            case DFS_REC -> {
+                dfsRecursiveGen(0, 0, visited);
                 maze.mainApp.setInformationText("Generated recursively");
-                maze.solveable = true;
-                break;
-            case DFS_ITER:
-                startIterativeGeneration(0, 0);
-                break;
-            case BLANK:
-                maze.solveable = false;
-                break;
-            default:
-                System.out.println("Invalid generation type");
+                maze.solvable = true;
+            }
+            case DFS_ITER -> initIterDFSgen(0, 0);
+            case BLANK -> maze.solvable = false;
+            default -> System.out.println("Invalid generation type");
         }
     }
 
-    public void dfsRecursiveGeneration(int y, int x, boolean[][] visited) {
+    public void dfsRecursiveGen(int y, int x, boolean[][] visited) {
         visited[y][x] = true;
-        int[][] possibles = genShuffledPossibles(y, x);
-        for (int[] newCoords : possibles) {
+        ArrayList<int[]> neighbors = maze.getPossibleNeighbors(y, x);
+        MazeClass.arrListShuffle2D(neighbors);
+        for (int[] newCoords : neighbors) {
             int newY = newCoords[0], newX = newCoords[1], wallToBreak = newCoords[2];
-            if ((newY >= 0) && (newY < maze.height) && (newX >= 0) && (newX < maze.width) && (!visited[newY][newX])) {
+            if (!visited[newY][newX]) {
                 maze.walls[y][x][wallToBreak] = false;                                  //remove wall of current cell
                 maze.walls[newY][newX][(wallToBreak + 2) % 4] = false;                       //remove wall of neighbor
-                dfsRecursiveGeneration(newY, newX, visited);                  //dfs recursive
+                dfsRecursiveGen(newY, newX, visited);                  //dfs recursive
             }
         }
     }
 
 
-    public void startIterativeGeneration(int startY, int startX) {
+    public void initIterDFSgen(int startY, int startX) {
         maze.mainApp.setInformationText("Iterating...");
         iterativeStack = new Stack<>();
         iterativeStack.push(new int[]{startY, startX});
         iterativeVisited = new boolean[maze.height][maze.width];
         iterativeVisited[startY][startX] = true;
         genStatus = GenStatus.IN_PROCESS;
-        iterativeGeneration();
+        dfsIterativeGen();
     }
 
-    public void iterativeGeneration() {
+    public void dfsIterativeGen() {
         if (!iterativeStack.isEmpty()) {
             int[] currCell = iterativeStack.pop();
             int y = currCell[0], x = currCell[1];
             iterativeVisited[y][x] = true;
-
-            int[][] possibles = genShuffledPossibles(y, x);
-            for (int[] newCoords : possibles) {
-                int newY = newCoords[0], newX = newCoords[1], wallToBreak = newCoords[2];
-                if ((newY >= 0) && (newY < maze.height) && (newX >= 0) && (newX < maze.width) && (!iterativeVisited[newY][newX])) {
+            ArrayList<int[]> neighbors = maze.getPossibleNeighbors(y, x);
+            MazeClass.arrListShuffle2D(neighbors);
+            for (int[] newCoords : neighbors) {
+                int nY = newCoords[0], nX = newCoords[1], wallToBreak = newCoords[2];
+                if (!iterativeVisited[nY][nX]) {
                     maze.walls[y][x][wallToBreak] = false;                                  //remove wall of current cell
-                    maze.walls[newY][newX][(wallToBreak + 2) % 4] = false;                       //remove wall of neighbor
+                    maze.walls[nY][nX][(wallToBreak + 2) % 4] = false;                       //remove wall of neighbor
                     iterativeStack.push(currCell);
                     iterativeStack.push(newCoords);
                     break;
@@ -102,31 +99,10 @@ public class MazeGenerator {
             maze.mainApp.setInformationText("Generated Iteratively");
             genStatus = GenStatus.DONE;
             currentCell = null;
-            maze.solveable = true;
+            maze.solvable = true;
         }
     }
 
-
-    private void twoDimArrShuffle(int[][] arr) {
-        for (int i = arr.length - 1; i > 0; i--) {
-            int index = (int) (Math.random() * (i + 1));    //Random gen
-            int[] temp = arr[index]; // Simple swap
-            arr[index] = arr[i];
-            arr[i] = temp;
-        }
-    }
-
-    private int[][] genShuffledPossibles(int y, int x) {
-        int[][] possibles = new int[][]{{y - 1, x, dir2idx(MazeClass.Dir.TOP)},
-                {y + 1, x, dir2idx(MazeClass.Dir.BOTTOM)},
-                {y, x - 1, dir2idx(MazeClass.Dir.LEFT)},
-                {y, x + 1, dir2idx(MazeClass.Dir.RIGHT)}};
-        twoDimArrShuffle(possibles);
-        return possibles;
-    }
-
-    private int dir2idx(MazeClass.Dir direction) {
-        return maze.dir2idx(direction);
-    }
+    //TODO make more obv
 
 }
