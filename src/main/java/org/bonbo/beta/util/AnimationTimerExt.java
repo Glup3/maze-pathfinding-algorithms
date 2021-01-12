@@ -5,10 +5,8 @@ import javafx.animation.AnimationTimer;
 public abstract class AnimationTimerExt extends AnimationTimer {
 
     private long sleepNs;
-    private long skipSteps = 1;
-
-    private long prevTime = 0;
-    private long step;
+    private long skipSteps;
+    private long prevTime;
 
     public AnimationTimerExt(long sleepMs) {
         this.sleepNs = sleepMs * 1_000_000;
@@ -19,6 +17,8 @@ public abstract class AnimationTimerExt extends AnimationTimer {
         this.skipSteps = skipSteps;
     }
 
+    public AnimationTimerExt() { }
+
     @Override
     public void handle(long now) {
 
@@ -28,12 +28,11 @@ public abstract class AnimationTimerExt extends AnimationTimer {
 
         prevTime = now;
 
-        handle();
-        step++;
-
-        if (step % skipSteps == 0) {
-            renderCanvas();
+        for (int i = 0; i <= skipSteps; i++) {
+            handle();
         }
+
+        renderCanvas();
     }
 
     public abstract void handle();

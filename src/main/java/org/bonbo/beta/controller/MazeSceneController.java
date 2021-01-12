@@ -75,7 +75,7 @@ public class MazeSceneController implements Initializable {
         cells.get(0).setVisited(true);
         cellStack.push(cells.get(0));
 
-        timer = new AnimationTimerExt(10, 50) {
+        timer = new AnimationTimerExt(100, 5) {
             @Override
             public void handle() {
                 if (!cellStack.empty()) {
