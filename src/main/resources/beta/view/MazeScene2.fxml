@@ -1,24 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="800.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.bonbo.beta.controller.MazeSceneController2">
-   <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0" spacing="15.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
-         <Button mnemonicParsing="false" onAction="#generateMaze" text="Generate" />
-         <Button mnemonicParsing="false" onAction="#resetGrid" text="Reset" />
-         <Button mnemonicParsing="false" onAction="#solve" text="Solve" />
-         <Button mnemonicParsing="false" onAction="#resetSolution" text="Reset Solution" />
-      </HBox>
-   </bottom>
    <center>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <Canvas fx:id="canvasGrid" height="600.0" width="600.0" />
          <Canvas fx:id="canvasSolution" height="600.0" width="600.0" />
       </StackPane>
    </center>
+   <bottom>
+       <GridPane style="-fx-background-color: white;" vgap="20.0" BorderPane.alignment="CENTER">
+           <columnConstraints>
+               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+           </columnConstraints>
+           <rowConstraints>
+               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+           </rowConstraints>
+           <BorderPane.margin>
+               <Insets/>
+           </BorderPane.margin>
+           <padding>
+               <Insets bottom="10.0" top="10.0"/>
+           </padding>
+           <ComboBox fx:id="generatorComboBox" maxWidth="1.7976931348623157E308">
+              <GridPane.margin>
+                  <Insets left="20.0" right="20.0"/>
+              </GridPane.margin>
+           </ComboBox>
+           <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#generateMaze" text="Generate"
+                   GridPane.columnIndex="1">
+              <GridPane.margin>
+                  <Insets left="50.0" right="50.0"/>
+              </GridPane.margin>
+           </Button>
+           <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#resetGrid" text="Reset"
+                   GridPane.columnIndex="2">
+              <GridPane.margin>
+                  <Insets left="50.0" right="50.0"/>
+              </GridPane.margin>
+           </Button>
+           <ComboBox fx:id="solverComboBox" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1">
+              <GridPane.margin>
+                  <Insets left="20.0" right="20.0"/>
+              </GridPane.margin>
+           </ComboBox>
+           <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#solve" text="Solve"
+                   GridPane.columnIndex="1" GridPane.rowIndex="1">
+              <GridPane.margin>
+                  <Insets left="50.0" right="50.0"/>
+              </GridPane.margin>
+           </Button>
+           <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#resetSolution"
+                   text="Reset Solution" GridPane.columnIndex="2" GridPane.rowIndex="1">
+              <GridPane.margin>
+                  <Insets left="50.0" right="50.0"/>
+              </GridPane.margin>
+           </Button>
+       </GridPane>
+   </bottom>
 </BorderPane>
