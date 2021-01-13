@@ -16,7 +16,11 @@ public abstract class MazeSolver extends Maze {
 
     private Cell source;
 
+    private int sourcePos;
+
     private Cell target;
+
+    private int targetPos;
 
     private Cell current;
 
@@ -28,16 +32,30 @@ public abstract class MazeSolver extends Maze {
 
     private boolean foundTarget;
 
-    //TODO use grid copy
-
-    public MazeSolver(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, Cell source, Cell target) {
+    public MazeSolver(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, int sourcePos, int targetPos) {
         super(cellSize, height, width, grid, gc);
 
-        this.source = source;
-        this.target = target;
+        this.sourcePos = sourcePos;
+        this.targetPos = targetPos;
     }
 
-    //TODO reset();
+    public void reset() {
+        for (Cell c : getGrid())  {
+            c.setDistance(Integer.MAX_VALUE);
+            c.setPrevious(null);
+            c.setVisitedSolved(false);
+            c.setPath(false);
+        }
+        this.source = getGrid().get(sourcePos);
+        this.target = getGrid().get(targetPos);
+        this.current = null;
+        this.vertex = null;
+        this.solved = false;
+        this.foundTarget = false;
+        this.timer = null;
+
+        getGc().clearRect(0, 0, getWidth(), getHeight());
+    }
 
     public abstract void solve();
 

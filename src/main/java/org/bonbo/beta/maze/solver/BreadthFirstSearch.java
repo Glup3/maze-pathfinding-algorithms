@@ -9,15 +9,19 @@ import java.util.LinkedList;
 
 public class BreadthFirstSearch extends MazeSolver {
 
-    private final LinkedList<Cell> queue;
+    private LinkedList<Cell> queue;
 
-    public BreadthFirstSearch(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, Cell source, Cell target) {
-        super(cellSize, height, width, grid, gc, source, target);
-        queue = new LinkedList<>();
+    public BreadthFirstSearch(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, int sourcePos, int targetPos) {
+        super(cellSize, height, width, grid, gc, sourcePos, targetPos);
     }
 
     @Override
     public void solve() {
+        reset();
+        queue = new LinkedList<>();
+        setSource(getGrid().get(getSourcePos()));
+        setTarget(getGrid().get(getTargetPos()));
+
         setCurrent(getSource());
         getCurrent().setVisitedSolved(true);
         queue.add(getCurrent());
@@ -65,7 +69,7 @@ public class BreadthFirstSearch extends MazeSolver {
 
     private void solve2() {
         setVertex(getTarget().getPrevious());
-        setTimer(new AnimationTimerExt(100) {
+        setTimer(new AnimationTimerExt(10) {
             @Override
             public void handle() {
                 if (getVertex().getPrevious() != null) {

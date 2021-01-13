@@ -12,6 +12,7 @@
          <Button mnemonicParsing="false" onAction="#generateMaze" text="Generate" />
          <Button mnemonicParsing="false" onAction="#resetGrid" text="Reset" />
          <Button mnemonicParsing="false" onAction="#solve" text="Solve" />
+         <Button mnemonicParsing="false" onAction="#resetSolution" text="Reset Solution" />
       </HBox>
    </bottom>
    <center>

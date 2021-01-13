@@ -13,18 +13,19 @@ public class Dijkstra extends MazeSolver {
 
     private HashSet<Cell> unvisitedCells;
 
-    public Dijkstra(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, Cell source, Cell target) {
-        super(cellSize, height, width, grid, gc, source, target);
+    public Dijkstra(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, int sourcePos, int targetPos) {
+        super(cellSize, height, width, grid, gc, sourcePos, targetPos);
     }
 
     @Override
     public void solve() {
+        reset();
         unvisitedCells = new HashSet<>(getGrid());
-        setSource(getGrid().get(0));
-        setTarget(getGrid().get(getGrid().size() - 1));
+        setSource(getGrid().get(getSourcePos()));
+        setTarget(getGrid().get(getTargetPos()));
         getSource().setDistance(0);
 
-        setTimer(new AnimationTimerExt(100) {
+        setTimer(new AnimationTimerExt(10) {
             @Override
             public void handle() {
                 if (!isFoundTarget() && !unvisitedCells.isEmpty()) {

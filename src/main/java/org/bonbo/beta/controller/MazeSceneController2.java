@@ -34,7 +34,6 @@ public class MazeSceneController2 implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // generator = new AldousBroder(40, (int) canvas.getHeight(), (int) canvas.getWidth(), grid, canvas.getGraphicsContext2D());
         generator = new DepthFirstSearch(SIZE, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasGrid.getGraphicsContext2D());
-        // solver = new Dijkstra(cellSize, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasSolution.getGraphicsContext2D(), grid.get(0), grid.get(grid.size() - 1));
     }
 
     @FXML
@@ -44,12 +43,22 @@ public class MazeSceneController2 implements Initializable {
 
     @FXML
     private void resetGrid() {
+        resetSolution();
         generator.reset();
     }
 
     @FXML
     private void solve() {
-        solver = new BreadthFirstSearch(SIZE, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasSolution.getGraphicsContext2D(), grid.get(0), grid.get(grid.size() - 1));
-        solver.solve();
+        if (generator.isGenerated()) {
+            solver = new Dijkstra(SIZE, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasSolution.getGraphicsContext2D(), 0, grid.size() - 1);
+            solver.solve();
+        }
+    }
+
+    @FXML
+    private void resetSolution() {
+        if (solver != null) {
+            solver.reset();
+        }
     }
 }
