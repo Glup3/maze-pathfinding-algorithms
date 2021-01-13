@@ -1,4 +1,4 @@
-package org.bonbo.beta.maze;
+package org.bonbo.beta.maze.generator;
 
 import javafx.scene.canvas.GraphicsContext;
 import org.bonbo.beta.dao.Cell;

@@ -2,17 +2,19 @@ package org.bonbo.beta.maze;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.bonbo.beta.controller.MazeSceneController;
 import org.bonbo.beta.dao.Cell;
-import org.bonbo.beta.util.AnimationTimerExt;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 @Getter
 @Setter
-public abstract class MazeGenerator {
+public abstract class Maze {
+
+    private Random rand = new Random();
 
     private int cellSize;
 
@@ -24,40 +26,15 @@ public abstract class MazeGenerator {
 
     private GraphicsContext gc;
 
-    private Cell current;
-
-    private AnimationTimerExt timer;
-
-    private Random rand = new Random();
-
-    private boolean generated;
-
-    public MazeGenerator(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc) {
+    protected Maze(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc) {
         this.cellSize = cellSize;
         this.height = height;
         this.width = width;
         this.grid = grid;
         this.gc = gc;
-
-        initCells();
-        updateCanvas();
     }
 
-    public abstract void generate();
-
-    abstract void nextStep();
-
-    public void reset() {
-        if (timer != null) {
-            timer.stop();
-        }
-        current = null;
-        generated = false;
-        initCells();
-        updateCanvas();
-    }
-
-    void initCells() {
+    protected void initCells() {
         grid.clear();
         int rows = Math.floorDiv(height, cellSize);
         int cols = Math.floorDiv(width, cellSize);
@@ -66,24 +43,6 @@ public abstract class MazeGenerator {
             for (int x = 0; x < cols; x++) {
                 grid.add(Cell.builder().x(x * cellSize).y(y * cellSize).build());
             }
-        }
-    }
-
-    void updateCanvas() {
-        gc.clearRect(0, 0, width, height);
-
-        for (Cell cell : grid) {
-            if (cell == current) {
-                cell.draw(gc, Color.GREEN);
-            } else if (cell.isVisitedSolved() && !cell.isPath()) {
-                cell.draw(gc, Color.ORANGE);
-            } else if (cell.isPath()) {
-                cell.draw(gc, Color.PURPLE);
-            }
-        }
-
-        for (Cell cell : grid) {
-            cell.draw(gc);
         }
     }
 
@@ -105,7 +64,27 @@ public abstract class MazeGenerator {
         };
     }
 
-    ArrayList<Cell> getUnvisitedNeighbours(Cell cell) {
+    protected ArrayList<Cell> getNeighbours(Cell cell) {
+        ArrayList<Cell> neighbours = new ArrayList<>();
+
+        if (!cell.getWalls()[0]) {
+            neighbours.add(grid.get(index(cell, Positions.TOP)));
+        }
+        if (!cell.getWalls()[1]) {
+            neighbours.add(grid.get(index(cell, Positions.RIGHT)));
+        }
+        if (!cell.getWalls()[2]) {
+            neighbours.add(grid.get(index(cell, Positions.BOTTOM)));
+        }
+        if (!cell.getWalls()[3]) {
+            neighbours.add(grid.get(index(cell, Positions.LEFT)));
+        }
+
+        return neighbours;
+    }
+
+
+    protected ArrayList<Cell> getUnvisitedNeighbours(Cell cell) {
         ArrayList<Cell> neighbours = new ArrayList<>();
         int topIndex = index(cell, Positions.TOP);
         int rightIndex = index(cell, Positions.RIGHT);
@@ -128,7 +107,7 @@ public abstract class MazeGenerator {
         return neighbours;
     }
 
-    boolean hasUnvisitedNeighbours(Cell cell) {
+    protected boolean hasUnvisitedNeighbours(Cell cell) {
         int topIndex = index(cell, Positions.TOP);
         int rightIndex = index(cell, Positions.RIGHT);
         int bottomIndex = index(cell, Positions.BOTTOM);
@@ -150,7 +129,7 @@ public abstract class MazeGenerator {
         return false;
     }
 
-    Cell getRandomNeighbour(Cell cell) {
+    protected Cell getRandomNeighbour(Cell cell) {
         int i = -1;
 
         while (i == -1) {
@@ -168,7 +147,7 @@ public abstract class MazeGenerator {
         return grid.get(i);
     }
 
-    void removeWalls(Cell a, Cell b) {
+    protected void removeWalls(Cell a, Cell b) {
         int x = a.getX() - b.getX();
         int y = a.getY() - b.getY();
 

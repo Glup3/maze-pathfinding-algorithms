@@ -4,9 +4,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import org.bonbo.beta.dao.Cell;
-import org.bonbo.beta.maze.AldousBroder;
-import org.bonbo.beta.maze.DepthFirstSearch;
-import org.bonbo.beta.maze.MazeGenerator;
+import org.bonbo.beta.maze.generator.DepthFirstSearch;
+import org.bonbo.beta.maze.generator.MazeGenerator;
+import org.bonbo.beta.maze.solver.Dijkstra;
+import org.bonbo.beta.maze.solver.MazeSolver;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,16 +16,23 @@ import java.util.ResourceBundle;
 public class MazeSceneController2 implements Initializable {
 
     @FXML
-    private Canvas canvas;
+    private Canvas canvasGrid;
+
+    @FXML
+    private Canvas canvasSolution;
 
     private MazeGenerator generator;
+
+    private MazeSolver solver;
 
     private final ArrayList<Cell> grid = new ArrayList<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        int cellSize = 40;
         // generator = new AldousBroder(40, (int) canvas.getHeight(), (int) canvas.getWidth(), grid, canvas.getGraphicsContext2D());
-        generator = new DepthFirstSearch(40, (int) canvas.getHeight(), (int) canvas.getWidth(), grid, canvas.getGraphicsContext2D());
+        generator = new DepthFirstSearch(cellSize, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasGrid.getGraphicsContext2D());
+        solver = new Dijkstra(cellSize, (int) canvasGrid.getHeight(), (int) canvasGrid.getWidth(), grid, canvasSolution.getGraphicsContext2D(), grid.get(0), grid.get(grid.size() - 1));
     }
 
     @FXML
@@ -35,5 +43,10 @@ public class MazeSceneController2 implements Initializable {
     @FXML
     private void resetGrid() {
         generator.reset();
+    }
+
+    @FXML
+    private void solve() {
+        solver.solve();
     }
 }
