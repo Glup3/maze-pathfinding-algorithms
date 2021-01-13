@@ -13,7 +13,7 @@ public class MazeSolver {
     }
 
     final public String SOLVE_METHOD_NOT_YET_SELECTED = "";
-    final public String STAY_LEFT = "Stay Left";            //TODO make into enum or make separate classes for algs
+    final public String STAY_LEFT = "Stay Left";            //TODO make into enum or make separate classes for algorithms
     final public String BFS = "BFS";
 
     public ObservableList<String> solveOptions = FXCollections.observableArrayList(STAY_LEFT, BFS);
@@ -26,13 +26,10 @@ public class MazeSolver {
     public boolean[][] visited;
     public LinkedList<int[]> shortestPath = new LinkedList<>();
     public int[] currPos;
+    public int[][][] prevNode;
 
     //Stay Left
     public int currSLDir;
-
-    //Dijkstra
-    private int[][] tentDist;       //tentative distance
-    public int[][][] prevNode;
 
     //BFS
     public Queue<int[]> bfsStack = new LinkedList<>();
@@ -53,7 +50,7 @@ public class MazeSolver {
             maze.mainApp.setInformationText("Generation in Process!");
             return;
         }
-        if (currentSolveMethod == SOLVE_METHOD_NOT_YET_SELECTED) {
+        if (currentSolveMethod.equals(SOLVE_METHOD_NOT_YET_SELECTED)) {
             maze.mainApp.setInformationText("Select solve method!");
             return;
         }
@@ -119,7 +116,6 @@ public class MazeSolver {
             solveStatus = SolveStatus.SOLVED;
         } else {
             for (int[] newCoords : maze.getAccessibleNeighbors(currPos[0], currPos[1])) {
-                System.out.print(", " + maze.getAccessibleNeighbors(currPos[0], currPos[1]).size());
                 if (!visited[newCoords[0]][newCoords[1]]) {
                     visited[newCoords[0]][newCoords[1]] = true;
                     prevNode[newCoords[0]][newCoords[1]] = currPos;
@@ -133,6 +129,8 @@ public class MazeSolver {
 }
 
 /*  BFS seemed suspiciously similar to dijkstra, it just wasn't made for maze solving I guess
+    private int[][] tentDist;       //tentative distance
+
 
     public void initDijkstra() {
         maze.mainApp.setInformationText("INIT DIJKSTRA");

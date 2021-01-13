@@ -146,7 +146,7 @@ public class MazeClass {
         }
     }
 
-    public int dir2idx(Dir direction) {
+    public static int dir2idx(Dir direction) {
         return switch (direction) {
             case TOP -> 0;
             case RIGHT -> 1;

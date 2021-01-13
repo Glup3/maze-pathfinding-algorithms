@@ -38,8 +38,8 @@ public class MainApp implements EventHandler<ActionEvent> {
             };
         }
 
-        private int getLoops(){
-            return switch(this) {
+        private int getLoops() {
+            return switch (this) {
                 case STOP -> 0;
                 case SLOW -> 3;
                 case FAST -> 20;
@@ -49,13 +49,13 @@ public class MainApp implements EventHandler<ActionEvent> {
         }
 
         private static Speed fromInt(int val) {
-            return switch(val) {          //works but not elegant
+            return switch (val) {          //works but not elegant
                 case 0 -> STOP;
                 case 1 -> SLOW;
                 case 2 -> FAST;
                 case 3 -> VERY_FAST;
                 case 4 -> INSTANT;
-                default-> STOP;
+                default -> STOP;
             };
         }
     }
@@ -109,7 +109,7 @@ public class MainApp implements EventHandler<ActionEvent> {
         initHBoxes();
 
         //******** Maze Object ********
-        maze = new MazeClass(100, 100, this);       //TODO make grid size dynamic with slider
+        maze = new MazeClass(300, 300, this);       //TODO make grid size dynamic with slider
         maze.solver = new MazeSolver(maze);
         maze.mazeGenerator = new MazeGenerator(maze);
         maze.mazeGenerator.genNewMaze(maze.mazeGenerator.BLANK);
@@ -133,8 +133,12 @@ public class MainApp implements EventHandler<ActionEvent> {
                 layout.setPadding(new Insets(GENERAL_PADDING, hPadding, GENERAL_PADDING, hPadding));
                 speedTextLabel.setText("Speed:\n" + iterSpeed.toString());
                 int loopsToDo = iterSpeed.getLoops();
-                for (int i = 0; i < loopsToDo && maze.solver.solveStatus == MazeSolver.SolveStatus.SOLVING; i++)   maze.solver.continueSolve();
-                for (int i = 0; i < loopsToDo && maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS; i++)   maze.mazeGenerator.dfsIterativeGen();
+                for (int i = 0; i < loopsToDo && maze.solver.solveStatus == MazeSolver.SolveStatus.SOLVING; i++)
+                    maze.solver.continueSolve();
+
+                for (int i = 0; i < loopsToDo && maze.mazeGenerator.genStatus == MazeGenerator.GenStatus.IN_PROCESS; i++)
+                    maze.mazeGenerator.dfsIterativeGen();
+
                 maze.drawMaze(gc);
             }
         }.start();
