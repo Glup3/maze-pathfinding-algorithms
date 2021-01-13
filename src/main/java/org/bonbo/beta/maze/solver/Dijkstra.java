@@ -13,8 +13,6 @@ public class Dijkstra extends MazeSolver {
 
     private HashSet<Cell> unvisitedCells;
 
-    private boolean foundTarget;
-
     public Dijkstra(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, Cell source, Cell target) {
         super(cellSize, height, width, grid, gc, source, target);
     }
@@ -29,11 +27,12 @@ public class Dijkstra extends MazeSolver {
         setTimer(new AnimationTimerExt(100) {
             @Override
             public void handle() {
-                if (!foundTarget && !unvisitedCells.isEmpty()) {
+                if (!isFoundTarget() && !unvisitedCells.isEmpty()) {
                     nextStep();
                 } else {
                     stop();
                     setCurrent(null);
+                    setFoundTarget(true);
                     solve2();
                 }
             }
@@ -41,11 +40,6 @@ public class Dijkstra extends MazeSolver {
             @Override
             public void renderCanvas() {
                 updateCanvas();
-            }
-
-            @Override
-            public boolean isDone() {
-                return isSolved();
             }
         });
 
@@ -63,7 +57,7 @@ public class Dijkstra extends MazeSolver {
         unvisitedCells.remove(cell);
 
         if (cell == getTarget()) {
-            foundTarget = true;
+            setFoundTarget(true);
         }
 
         getNeighbours(cell).forEach(c -> {
@@ -96,11 +90,6 @@ public class Dijkstra extends MazeSolver {
                 @Override
                 public void renderCanvas() {
                     updateCanvas();
-                }
-
-                @Override
-                public boolean isDone() {
-                    return isSolved();
                 }
             });
 

@@ -91,11 +91,6 @@ public class MazeSceneController implements Initializable {
             public void renderCanvas() {
                 updateCanvas(canvas.getGraphicsContext2D());
             }
-
-            @Override
-            public boolean isDone() {
-                return generated;
-            }
         };
         timer.start();
     }
@@ -139,10 +134,7 @@ public class MazeSceneController implements Initializable {
                 updateCanvas(canvas.getGraphicsContext2D());
             }
 
-            @Override
-            public boolean isDone() {
-                return generated;
-            }
+
         };
 
         timer.start();
@@ -318,11 +310,6 @@ public class MazeSceneController implements Initializable {
                                 public void renderCanvas() {
                                     updateCanvas(canvas2.getGraphicsContext2D());
                                 }
-
-                                @Override
-                                public boolean isDone() {
-                                    return generated;
-                                }
                             };
                             solveTimer.start();
                         }
@@ -332,11 +319,6 @@ public class MazeSceneController implements Initializable {
                 @Override
                 public void renderCanvas() {
                     updateCanvas(canvas2.getGraphicsContext2D());
-                }
-
-                @Override
-                public boolean isDone() {
-                    return generated;
                 }
             };
 
@@ -450,11 +432,6 @@ public class MazeSceneController implements Initializable {
                             public void renderCanvas() {
                                 updateCanvas(canvas2.getGraphicsContext2D());
                             }
-
-                            @Override
-                            public boolean isDone() {
-                                return generated;
-                            }
                         };
 
                         solveTimer.start();
@@ -464,11 +441,6 @@ public class MazeSceneController implements Initializable {
                 @Override
                 public void renderCanvas() {
                     updateCanvas(canvas2.getGraphicsContext2D());
-                }
-
-                @Override
-                public boolean isDone() {
-                    return generated;
                 }
             };
 

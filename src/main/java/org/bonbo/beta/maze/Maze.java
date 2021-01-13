@@ -1,10 +1,8 @@
 package org.bonbo.beta.maze;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
-import org.bonbo.beta.controller.MazeSceneController;
 import org.bonbo.beta.dao.Cell;
 
 import java.util.ArrayList;
@@ -41,12 +39,12 @@ public abstract class Maze {
 
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
-                grid.add(Cell.builder().x(x * cellSize).y(y * cellSize).build());
+                grid.add(Cell.builder().x(x * cellSize).y(y * cellSize).size(cellSize).build());
             }
         }
     }
 
-    int index(int x, int y) {
+    private int index(int x, int y) {
         int cols = Math.floorDiv(width, cellSize);
         if (x < 0 || x > width - 1 || y < 0 || y > height - 1) {
             return -1;
@@ -55,7 +53,7 @@ public abstract class Maze {
         return (x / cellSize) + (y / cellSize) * cols;
     }
 
-    int index(Cell cell, Positions position) {
+    private int index(Cell cell, Positions position) {
         return switch (position) {
             case TOP -> index(cell.getX(), cell.getY() - cellSize);
             case RIGHT -> index(cell.getX() + cellSize, cell.getY());
@@ -82,7 +80,6 @@ public abstract class Maze {
 
         return neighbours;
     }
-
 
     protected ArrayList<Cell> getUnvisitedNeighbours(Cell cell) {
         ArrayList<Cell> neighbours = new ArrayList<>();
@@ -122,11 +119,8 @@ public abstract class Maze {
         if (bottomIndex > 0 && !grid.get(bottomIndex).isVisited()) {
             return true;
         }
-        if (leftIndex > 0 && !grid.get(leftIndex).isVisited()) {
-            return true;
-        }
 
-        return false;
+        return leftIndex > 0 && !grid.get(leftIndex).isVisited();
     }
 
     protected Cell getRandomNeighbour(Cell cell) {
@@ -169,7 +163,7 @@ public abstract class Maze {
 
     }
 
-    enum Positions {
+    private enum Positions {
         TOP,
         RIGHT,
         BOTTOM,

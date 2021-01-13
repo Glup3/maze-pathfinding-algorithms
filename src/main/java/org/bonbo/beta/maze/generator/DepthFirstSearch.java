@@ -23,7 +23,7 @@ public class DepthFirstSearch extends MazeGenerator {
         getGrid().get(0).setVisited(true);
         stack.push(getGrid().get(0));
 
-        setTimer(new AnimationTimerExt(0, 2) {
+        setTimer(new AnimationTimerExt(0, 3) {
             @Override
             public void handle() {
                 if (!stack.empty()) {
@@ -40,11 +40,6 @@ public class DepthFirstSearch extends MazeGenerator {
             public void renderCanvas() {
                                              updateCanvas();
                                                             }
-
-            @Override
-            public boolean isDone() {
-                                      return isGenerated();
-                                                           }
         });
         getTimer().start();
     }

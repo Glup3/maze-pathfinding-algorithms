@@ -26,6 +26,10 @@ public abstract class MazeSolver extends Maze {
 
     private boolean solved;
 
+    private boolean foundTarget;
+
+    //TODO use grid copy
+
     public MazeSolver(int cellSize, int height, int width, ArrayList<Cell> grid, GraphicsContext gc, Cell source, Cell target) {
         super(cellSize, height, width, grid, gc);
 

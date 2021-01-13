@@ -20,6 +20,8 @@ public class Cell {
     @EqualsAndHashCode.Include
     private int y;
 
+    private int size;
+
     private final boolean[] walls = { true, true, true, true };
 
     private boolean visited;
@@ -36,7 +38,6 @@ public class Cell {
     public void draw(GraphicsContext gc) {
         gc.setLineWidth(2.0);
         gc.setStroke(Color.WHITE);
-        int size = MazeSceneController.CELL_SIZE;
 
         if (walls[0]) { gc.strokeLine(x, y, x + size, y); }
         if (walls[1]) { gc.strokeLine(x + size, y, x + size, y + size); }
@@ -46,7 +47,6 @@ public class Cell {
     }
 
     public void draw(GraphicsContext gc, Color color) {
-        int size = MazeSceneController.CELL_SIZE;
         gc.setFill(color);
         gc.fillRect(x, y, size, size);
     }

@@ -46,14 +46,8 @@ public abstract class MazeGenerator extends Maze {
     void updateCanvas() {
         getGc().clearRect(0, 0, getWidth(), getHeight());
 
-        for (Cell cell : getGrid()) {
-            if (cell == current) {
-                cell.draw(getGc(), Color.GREEN);
-            } else if (cell.isVisitedSolved() && !cell.isPath()) {
-                cell.draw(getGc(), Color.ORANGE);
-            } else if (cell.isPath()) {
-                cell.draw(getGc(), Color.PURPLE);
-            }
+        if (current != null) {
+            current.draw(getGc(), Color.GREEN);
         }
 
         for (Cell cell : getGrid()) {

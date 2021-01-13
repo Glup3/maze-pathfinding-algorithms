@@ -34,11 +34,6 @@ public class AldousBroder extends MazeGenerator {
             public void renderCanvas() {
                 updateCanvas();
             }
-
-            @Override
-            public boolean isDone() {
-                return isGenerated();
-            }
         });
 
         getTimer().start();

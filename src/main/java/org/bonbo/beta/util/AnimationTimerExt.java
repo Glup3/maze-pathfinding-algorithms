@@ -1,7 +1,9 @@
 package org.bonbo.beta.util;
 
 import javafx.animation.AnimationTimer;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 public abstract class AnimationTimerExt extends AnimationTimer {
 
     private long sleepNs;
@@ -17,8 +19,6 @@ public abstract class AnimationTimerExt extends AnimationTimer {
         this.skipSteps = skipSteps;
     }
 
-    public AnimationTimerExt() { }
-
     @Override
     public void handle(long now) {
 
@@ -28,7 +28,8 @@ public abstract class AnimationTimerExt extends AnimationTimer {
 
         prevTime = now;
 
-        for (int i = 0; i <= skipSteps && !isDone(); i++) {
+        //TODO BUG: executes too often
+        for (int i = 0; i <= skipSteps; i++) {
             handle();
         }
 
@@ -38,7 +39,5 @@ public abstract class AnimationTimerExt extends AnimationTimer {
     public abstract void handle();
 
     public abstract void renderCanvas();
-
-    public abstract boolean isDone();
 
 }
